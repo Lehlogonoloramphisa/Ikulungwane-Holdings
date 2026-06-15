@@ -272,6 +272,57 @@ export const localApi = {
       return publicUser(user);
     },
 
+    async hasAdminAccount() {
+      return getUsers().some((user) => user.role === "admin");
+    },
+
+    async createAdminAccount({ email, password, full_name }) {
+      const normalizedEmail = normalizeEmail(email);
+      if (!normalizedEmail) {
+        throw new Error("Enter an admin email address");
+      }
+
+      if (!password || password.length < 8) {
+        throw new Error("Use at least 8 characters for the admin password");
+      }
+
+      const users = getUsers();
+      if (users.some((user) => user.role === "admin")) {
+        throw new Error("An admin account already exists. Log in instead.");
+      }
+
+      const now = new Date().toISOString();
+      const existingIndex = users.findIndex((user) => user.email === normalizedEmail);
+      const adminUser = existingIndex >= 0
+        ? {
+            ...users[existingIndex],
+            email: normalizedEmail,
+            password,
+            full_name: full_name || users[existingIndex].full_name || "Studio Owner",
+            role: "admin",
+            verified: true,
+            updated_date: now,
+          }
+        : {
+            id: makeId(),
+            email: normalizedEmail,
+            password,
+            full_name: full_name || "Studio Owner",
+            role: "admin",
+            verified: true,
+            created_date: now,
+            updated_date: now,
+          };
+
+      const nextUsers = existingIndex >= 0
+        ? users.map((user, index) => (index === existingIndex ? adminUser : user))
+        : [...users, adminUser];
+
+      saveUsers(nextUsers);
+      createSession(adminUser.id);
+      return publicUser(adminUser);
+    },
+
     async register({ email, password }) {
       const normalizedEmail = normalizeEmail(email);
       const users = getUsers();
@@ -286,7 +337,7 @@ export const localApi = {
         email: normalizedEmail,
         password,
         full_name: normalizedEmail.split("@")[0],
-        role: users.length === 0 ? "admin" : "user",
+        role: "user",
         verified: false,
         created_date: now,
         updated_date: now,
@@ -372,7 +423,7 @@ export const localApi = {
           id: makeId(),
           email,
           full_name: "Local Demo User",
-          role: users.length === 0 ? "admin" : "user",
+          role: "user",
           verified: true,
           created_date: new Date().toISOString(),
           updated_date: new Date().toISOString(),
@@ -389,7 +440,7 @@ export const localApi = {
       const storage = getStorage();
       storage?.removeItem(SESSION_KEY);
       if (redirectUrl) {
-        redirectTo("/");
+        redirectTo(redirectUrl);
       }
     },
 

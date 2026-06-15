@@ -50,7 +50,7 @@ const hexToHsl = (hex) => {
 };
 
 export const applyBrandingVariables = (branding = {}) => {
-  const primaryColor = branding.accentColor || branding.primaryColor || "#ff9800";
+  const primaryColor = branding.accentColor || branding.primaryColor || "#e11d2e";
   const secondaryColor = branding.secondaryColor || "#39d6c2";
   const primaryHsl = hexToHsl(primaryColor);
 

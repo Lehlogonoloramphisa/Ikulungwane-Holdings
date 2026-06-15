@@ -2,6 +2,8 @@ import { useMemo, useSyncExternalStore } from "react";
 import { cmsDefaults } from "@/data/cmsDefaults";
 
 const CMS_KEY = "ikulungwane_cms_content";
+const LEGACY_DEFAULT_ACCENT = "#ff9800";
+const DEFAULT_ACCENT = "#e11d2e";
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -44,7 +46,19 @@ export const readCmsOverride = () => {
 
   try {
     const raw = storage.getItem(CMS_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const override = raw ? JSON.parse(raw) : {};
+    const branding = override?.global?.branding;
+
+    if (branding) {
+      if (branding.primaryColor === LEGACY_DEFAULT_ACCENT) {
+        branding.primaryColor = DEFAULT_ACCENT;
+      }
+      if (branding.accentColor === LEGACY_DEFAULT_ACCENT) {
+        branding.accentColor = DEFAULT_ACCENT;
+      }
+    }
+
+    return override;
   } catch {
     return {};
   }

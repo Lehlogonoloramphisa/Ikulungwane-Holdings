@@ -12,38 +12,38 @@
     --card-foreground: 0 0% 93%;
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 93%;
-    --primary: 40 35% 60%;
+    --primary: 355 77% 50%;
     --primary-foreground: 0 0% 0%;
     --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 85%;
     --muted: 0 0% 8%;
     --muted-foreground: 0 0% 55%;
-    --accent: 40 35% 60%;
+    --accent: 355 77% 50%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 12%;
     --input: 0 0% 12%;
-    --ring: 40 35% 60%;
-    --chart-1: 40 35% 60%;
+    --ring: 355 77% 50%;
+    --chart-1: 355 77% 50%;
     --chart-2: 0 0% 70%;
     --chart-3: 0 0% 50%;
-    --chart-4: 40 25% 45%;
+    --chart-4: 355 55% 36%;
     --chart-5: 0 0% 40%;
     --radius: 0.25rem;
     --font-heading: 'Inter', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --font-display: 'Inter', system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --gold: 40 35% 60%;
+    --gold: 355 77% 50%;
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 93%;
-    --sidebar-primary: 40 35% 60%;
+    --sidebar-primary: 355 77% 50%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 8%;
     --sidebar-accent-foreground: 0 0% 93%;
     --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 40 35% 60%;
+    --sidebar-ring: 355 77% 50%;
   }
 
   .dark {
@@ -53,32 +53,32 @@
     --card-foreground: 0 0% 93%;
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 93%;
-    --primary: 40 35% 60%;
+    --primary: 355 77% 50%;
     --primary-foreground: 0 0% 0%;
     --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 85%;
     --muted: 0 0% 8%;
     --muted-foreground: 0 0% 55%;
-    --accent: 40 35% 60%;
+    --accent: 355 77% 50%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 12%;
     --input: 0 0% 12%;
-    --ring: 40 35% 60%;
-    --chart-1: 40 35% 60%;
+    --ring: 355 77% 50%;
+    --chart-1: 355 77% 50%;
     --chart-2: 0 0% 70%;
     --chart-3: 0 0% 50%;
-    --chart-4: 40 25% 45%;
+    --chart-4: 355 55% 36%;
     --chart-5: 0 0% 40%;
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 93%;
-    --sidebar-primary: 40 35% 60%;
+    --sidebar-primary: 355 77% 50%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 8%;
     --sidebar-accent-foreground: 0 0% 93%;
     --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 40 35% 60%;
+    --sidebar-ring: 355 77% 50%;
   }
 }
 

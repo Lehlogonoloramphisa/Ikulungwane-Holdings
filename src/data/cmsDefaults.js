@@ -65,9 +65,9 @@ export const cmsDefaults = {
       ],
     },
     branding: {
-      primaryColor: "#ff9800",
+      primaryColor: "#e11d2e",
       secondaryColor: "#39d6c2",
-      accentColor: "#ff9800",
+      accentColor: "#e11d2e",
       typography: "Outfit",
       bodyFont: "Outfit",
       headingFont: "Outfit",

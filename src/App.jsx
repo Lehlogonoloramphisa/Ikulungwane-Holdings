@@ -10,6 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 // Layout
 import SiteLayout from './components/layout/SiteLayout';
 import AdminLayout from './components/admin/AdminLayout';
+import AdminGate from './components/admin/AdminGate';
 
 // Public Pages
 import Home from './pages/Home';
@@ -37,6 +38,7 @@ import BlogManagement from './pages/admin/BlogManagement';
 import TeamManagement from './pages/admin/TeamManagement';
 import SettingsPage from './pages/admin/SettingsPage';
 import PageBuilder from './pages/admin/PageBuilder';
+import AdminLogin from './pages/admin/AdminLogin';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -65,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* Public Pages */}
       <Route element={<SiteLayout />}>
@@ -82,7 +85,7 @@ const AuthenticatedApp = () => {
       </Route>
 
       {/* Admin Dashboard */}
-      <Route element={<AdminLayout />}>
+      <Route element={<AdminGate><AdminLayout /></AdminGate>}>
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/page-builder" element={<PageBuilder />} />
         <Route path="/admin/portfolio" element={<PortfolioManagement />} />

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ADMIN_SEEDED_QUERY_KEYS, seedStarterContent } from "@/lib/adminSeed";
 import { applyBrandingVariables } from "@/lib/branding";
+import { useAuth } from "@/lib/AuthContext";
 import { useCms } from "@/lib/cms";
 
 const NAV_GROUPS = [
@@ -53,8 +54,14 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { logout, user } = useAuth();
   const cms = useCms();
   const currentPage = NAV_ITEMS.find((item) => isActivePath(location.pathname, item.path));
+
+  const handleLogout = () => {
+    logout(false);
+    window.location.href = "/admin/login";
+  };
 
   useEffect(() => {
     applyBrandingVariables(cms.global.branding);
@@ -144,12 +151,15 @@ export default function AdminLayout() {
               <span className="admin-status-dot" />
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Studio Ready</p>
-                <p className="mt-1 text-xs text-white/40">Premium content control</p>
+                <p className="mt-1 max-w-[190px] truncate text-xs text-white/40">{user?.email || "Premium content control"}</p>
               </div>
             </div>
           </div>
-          <Link to="/" className="admin-site-link">
+          <button type="button" onClick={handleLogout} className="admin-site-link admin-logout-link">
             <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
+          <Link to="/" className="admin-site-link">
             View Site
             <ArrowUpRight className="ml-auto h-4 w-4" />
           </Link>
@@ -180,6 +190,9 @@ export default function AdminLayout() {
               View live site
               <ArrowUpRight className="h-4 w-4" />
             </Link>
+            <button type="button" onClick={handleLogout} className="admin-icon-button" aria-label="Sign out">
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
 

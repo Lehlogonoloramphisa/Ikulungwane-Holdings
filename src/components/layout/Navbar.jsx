@@ -53,7 +53,7 @@ export default function Navbar() {
           scrolled || open ? "bg-black/88 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
         }`}
       >
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <nav className="site-header-nav mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link to="/" className="site-brand group" aria-label={`${site.companyName} home`}>
             {site.logoImage ? (
               <img src={site.logoImage} alt={site.logoAlt || site.companyName} className="site-brand-logo" />
@@ -69,7 +69,7 @@ export default function Navbar() {
             )}
           </Link>
 
-          <div className="hidden items-center gap-7 xl:flex">
+          <div className="site-nav-list hidden items-center gap-7 xl:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -83,7 +83,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="site-header-actions flex items-center gap-3">
             <a
               href={contact.whatsappUrl}
               target="_blank"
@@ -93,7 +93,7 @@ export default function Navbar() {
               <MessageCircle className="h-4 w-4" />
               {navigation.whatsappText}
             </a>
-            <Link to={navigation.buttonLink} className="ashley-button ashley-button-primary hidden sm:inline-flex">
+            <Link to={navigation.buttonLink} className="ashley-button ashley-button-primary site-header-cta hidden sm:inline-flex">
               {navigation.buttonText}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
