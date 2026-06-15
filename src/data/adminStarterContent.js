@@ -1,0 +1,196 @@
+import { fallbackBlogPosts } from "@/data/fallbackContent";
+import { fallbackPortfolioProjects } from "@/data/portfolioFallback";
+
+const portfolioCategoryMap = {
+  "wedding-editorial": "weddings",
+  "gala-after-dark": "events",
+  "graduation-archive": "graduations",
+  "urban-lifestyle": "lifestyle",
+  "brand-story": "corporate",
+  "light-study": "product",
+  "film-room": "videography",
+  "studio-portraits": "lifestyle",
+};
+
+export const starterPortfolioProjects = fallbackPortfolioProjects.map((project, index) => ({
+  title: project.title,
+  slug: project.id,
+  category: portfolioCategoryMap[project.id] || "events",
+  cover_image: project.cover_image,
+  description: project.description,
+  images: [project.cover_image],
+  video_url: "",
+  client_name: "Ikulungwane Studio",
+  client_testimonial: "",
+  location: "South Africa",
+  date: "",
+  featured: index < 5,
+  published: true,
+  order: index + 1,
+  metadata: "",
+}));
+
+export const starterServices = [
+  {
+    title: "Photography",
+    slug: "photography",
+    icon: "Camera",
+    description: "Editorial, event, portrait, product, and lifestyle photography shaped with atmosphere and precision.",
+    long_description: "Photography coverage for brands, events, portraits, products, and milestone moments.",
+    cover_image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1600&q=84",
+    packages: [
+      { name: "Essential", price: "R2,500", features: ["2 Hours Coverage", "50+ Edited Photos", "Online Gallery"] },
+      { name: "Premium", price: "R6,000", features: ["Half Day Coverage", "200+ Edited Photos", "Online Gallery", "1 Photographer"] },
+      { name: "Luxury", price: "R12,000", features: ["Full Day Coverage", "500+ Edited Photos", "2 Photographers", "Premium Album"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 1,
+  },
+  {
+    title: "Videography",
+    slug: "videography",
+    icon: "Video",
+    description: "Cinematic video production for weddings, campaigns, events, reels, and brand films.",
+    long_description: "Motion work for social, campaign, event, and brand storytelling.",
+    cover_image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1600&q=84",
+    packages: [
+      { name: "Highlight Film", price: "R5,000", features: ["3-5 Min Edit", "Licensed Music", "Color Grading"] },
+      { name: "Full Film", price: "R12,000", features: ["15-20 Min Edit", "Drone Footage", "Licensed Music", "Raw Footage"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 2,
+  },
+  {
+    title: "Branding & Identity Design",
+    slug: "branding",
+    icon: "Palette",
+    description: "Visual identity systems that make your brand feel consistent, premium, and memorable.",
+    long_description: "Brand identity design for businesses that need clarity, polish, and consistency.",
+    cover_image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1600&q=84",
+    packages: [
+      { name: "Starter", price: "R3,500", features: ["Logo Design", "Color Palette", "Brand Guidelines"] },
+      { name: "Complete", price: "R8,000", features: ["Full Brand Identity", "Stationery Design", "Social Media Kit"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 3,
+  },
+  {
+    title: "Website Design & Development",
+    slug: "web-design",
+    icon: "Globe",
+    description: "Modern websites with clean structure, strong visuals, responsive layouts, and clear conversion paths.",
+    long_description: "Responsive website design and development for modern businesses and campaigns.",
+    cover_image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=84",
+    packages: [
+      { name: "Starter", price: "R8,000", features: ["5-Page Website", "Mobile Responsive", "SEO Basics", "Contact Form"] },
+      { name: "Business", price: "R15,000", features: ["10-Page Website", "Advanced SEO", "Blog Integration"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 4,
+  },
+  {
+    title: "Advertising & Marketing",
+    slug: "advertising",
+    icon: "Megaphone",
+    description: "Campaigns, content calendars, launch visuals, and digital marketing direction that connect with the right audience.",
+    long_description: "Marketing support for launches, content planning, campaigns, and brand visibility.",
+    cover_image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1600&q=84",
+    packages: [
+      { name: "Starter", price: "R4,000", features: ["Social Media Strategy", "Content Calendar", "Monthly Analytics"] },
+      { name: "Growth", price: "R10,000", features: ["Ad Management", "Content Creation", "Weekly Reporting"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 5,
+  },
+  {
+    title: "Creative Consulting",
+    slug: "consulting",
+    icon: "Lightbulb",
+    description: "Brand audits, campaign direction, and creative guidance for teams who need clarity before production.",
+    long_description: "Strategy and creative direction before production starts.",
+    cover_image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1600&q=84",
+    packages: [
+      { name: "Consultation", price: "R2,000", features: ["Brand Audit", "Strategy Session", "Action Plan"] },
+      { name: "Full Package", price: "R6,000", features: ["Strategy Development", "Implementation Support", "Follow-up"] },
+    ],
+    faqs: [],
+    published: true,
+    order: 6,
+  },
+];
+
+export const starterTestimonials = [
+  {
+    client_name: "Sihle Mazibuko",
+    rating: 5,
+    review: "Their ability to think outside the box and bring unique ideas to life is truly impressive.",
+    service_type: "Branding",
+    featured: true,
+    published: true,
+  },
+  {
+    client_name: "Jim Mkhonto",
+    rating: 5,
+    review: "They consistently deliver exceptional creative solutions and make the process feel effortless.",
+    service_type: "Photography",
+    featured: true,
+    published: true,
+  },
+  {
+    client_name: "Phindile Nkosi",
+    rating: 5,
+    review: "Meticulous attention to detail, visually stunning work, and a final result that felt premium.",
+    service_type: "Videography",
+    featured: true,
+    published: true,
+  },
+];
+
+export const starterTeamMembers = [
+  {
+    name: "Patrick Mgidi",
+    role: "Creative Director . Photographer . Videographer . Graphic Designer . Branding Specialist",
+    bio: "Creative direction, visual production, and brand presence.",
+    photo: "https://ikulungwaneholdings.co.za/img/faces/1.jpg",
+    specialties: ["Photography", "Videography", "Branding"],
+    social_instagram: "",
+    social_linkedin: "",
+    order: 1,
+    published: true,
+  },
+  {
+    name: "Adrianne McDonalds",
+    role: "Graphic Designer . Videographer . Social Media Manager",
+    bio: "Visual design, motion, and social content systems.",
+    photo: "https://ikulungwaneholdings.co.za/img/faces/3.jpg",
+    specialties: ["Design", "Videography", "Social Media"],
+    social_instagram: "",
+    social_linkedin: "",
+    order: 2,
+    published: true,
+  },
+  {
+    name: "Carly Kgaogelo",
+    role: "Marketing Director . Content Creator . Social Media Manager",
+    bio: "Marketing direction, content planning, and campaign support.",
+    photo: "https://ikulungwaneholdings.co.za/img/faces/2.jpg",
+    specialties: ["Marketing", "Content Creation", "Social Media"],
+    social_instagram: "",
+    social_linkedin: "",
+    order: 3,
+    published: true,
+  },
+];
+
+export const starterBlogPosts = fallbackBlogPosts.map((post) => ({
+  ...post,
+  tags: [post.category],
+  published: true,
+  meta_title: post.title,
+  meta_description: post.excerpt,
+}));

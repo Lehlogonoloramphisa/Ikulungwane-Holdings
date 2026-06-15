@@ -1,0 +1,58 @@
+export const fallbackPortfolioProjects = [
+  {
+    id: "wedding-editorial",
+    title: "The Anderson Wedding",
+    category: "Wedding Editorial",
+    description: "A soft, cinematic wedding story built around intimate portraits, motion, and golden-hour atmosphere.",
+    cover_image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1800&q=86",
+  },
+  {
+    id: "gala-after-dark",
+    title: "Corporate Excellence Gala",
+    category: "Event Photography",
+    description: "A polished evening showcase with dramatic light, guest portraits, stage moments, and premium event coverage.",
+    cover_image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1800&q=86",
+  },
+  {
+    id: "graduation-archive",
+    title: "Class of 2024 Graduation",
+    category: "Graduation",
+    description: "A celebratory academic archive focused on family emotion, formal portraits, and candid ceremony details.",
+    cover_image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1800&q=86",
+  },
+  {
+    id: "urban-lifestyle",
+    title: "Urban Lifestyle Collection",
+    category: "Lifestyle",
+    description: "Street-level portraiture with movement, texture, architecture, and editorial styling.",
+    cover_image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1800&q=86",
+  },
+  {
+    id: "brand-story",
+    title: "Brand Story Campaign",
+    category: "Brand Campaign",
+    description: "A visual brand system translated into product imagery, founder portraits, social content, and web-ready assets.",
+    cover_image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1800&q=86",
+  },
+  {
+    id: "light-study",
+    title: "Product Light Study",
+    category: "Product",
+    description: "Minimal product photography shaped with reflective surfaces, controlled shadows, and clean commercial framing.",
+    cover_image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1800&q=86",
+  },
+  {
+    id: "film-room",
+    title: "Motion Room",
+    category: "Videography",
+    description: "A cinematic production sequence for social reels, brand film, and short-form campaign assets.",
+    cover_image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1800&q=86",
+  },
+  {
+    id: "studio-portraits",
+    title: "Studio Portrait Series",
+    category: "Portraiture",
+    description: "Clean studio portraits balancing polished direction with natural expression and confident presence.",
+    cover_image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1800&q=86",
+  },
+];
