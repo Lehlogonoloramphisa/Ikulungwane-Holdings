@@ -6,6 +6,7 @@ import { localApi } from "@/api/localClient";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { sendSiteEmail } from "@/lib/emailNotifications";
 
 const STEPS = [
   { icon: Camera, label: "Service", kicker: "What are we creating?" },
@@ -48,13 +49,15 @@ export default function Booking() {
   const handleSubmit = async () => {
     setLoading(true);
     const ref = "IKU-" + Date.now().toString(36).toUpperCase();
-    await localApi.entities.Booking.create({
+    const booking = {
       ...form,
       reference: ref,
       status: "new",
       deposit_amount: page.depositAmount,
       confirmation_email: page.confirmationEmail,
-    });
+    };
+    await localApi.entities.Booking.create(booking);
+    await sendSiteEmail({ type: "booking", payload: booking, cms });
     setRefNum(ref);
     setSubmitted(true);
     setLoading(false);

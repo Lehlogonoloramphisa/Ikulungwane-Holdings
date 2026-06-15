@@ -1,6 +1,8 @@
 #env
 .env
 .env.*
+public/api/email-config.php
+dist/api/email-config.php
 
 # Logs
 /logs

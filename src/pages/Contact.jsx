@@ -5,6 +5,7 @@ import { localApi } from "@/api/localClient";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCms } from "@/lib/cms";
+import { sendSiteEmail } from "@/lib/emailNotifications";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", service_interested: "", message: "" });
@@ -26,7 +27,9 @@ export default function Contact() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    await localApi.entities.ContactMessage.create({ ...form, status: "new" });
+    const message = { ...form, status: "new" };
+    await localApi.entities.ContactMessage.create(message);
+    await sendSiteEmail({ type: "contact", payload: message, cms });
     setSubmitted(true);
     setLoading(false);
   };

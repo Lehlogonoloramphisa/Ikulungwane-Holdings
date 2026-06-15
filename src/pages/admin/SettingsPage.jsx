@@ -7,12 +7,14 @@ import {
   ExternalLink,
   Image as ImageIcon,
   LayoutTemplate,
+  Mail,
   Navigation,
   Palette,
   Phone,
   Plus,
   Save,
   Search,
+  Send,
   Share2,
   ShieldCheck,
   Trash2,
@@ -28,10 +30,12 @@ import { localApi } from "@/api/localClient";
 import { cmsDefaults } from "@/data/cmsDefaults";
 import { applyBrandingVariables } from "@/lib/branding";
 import { deepMerge, getValueByPath, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
+import { emailLinesToList, listToEmailLines, sendSiteEmail } from "@/lib/emailNotifications";
 
 const SETTINGS_NAV = [
   { key: "identity", label: "Identity", icon: Building2 },
   { key: "contact", label: "Contact", icon: Phone },
+  { key: "email", label: "Email", icon: Mail },
   { key: "socials", label: "Socials", icon: Share2 },
   { key: "navigation", label: "Navigation", icon: Navigation },
   { key: "booking", label: "Booking", icon: CalendarCheck },
@@ -180,6 +184,8 @@ export default function SettingsPage() {
   const override = useCmsOverride();
   const [active, setActive] = useState("identity");
   const [saved, setSaved] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTest, setEmailTest] = useState(null);
   const [uploadingPath, setUploadingPath] = useState("");
   const [content, setContent] = useState(() => deepMerge(cmsDefaults, override));
 
@@ -241,6 +247,28 @@ export default function SettingsPage() {
     window.setTimeout(() => setSaved(false), 1800);
   };
 
+  const handleEmailTest = async () => {
+    setTestingEmail(true);
+    setEmailTest(null);
+
+    const result = await sendSiteEmail({
+      type: "test",
+      payload: { testRecipient: get("global.email.testRecipient") },
+      cms: content,
+    });
+
+    if (result.ok && !result.skipped) {
+      setEmailTest({ type: "success", message: "Test email sent. Check the selected inbox." });
+    } else {
+      setEmailTest({
+        type: "error",
+        message: result.message || result.reason || "The test email could not be sent.",
+      });
+    }
+
+    setTestingEmail(false);
+  };
+
   const handleRestoreDefaults = () => {
     if (!window.confirm("Restore all website settings and page content to the Ikulungwane defaults?")) return;
     const defaults = clone(cmsDefaults);
@@ -251,6 +279,7 @@ export default function SettingsPage() {
   };
 
   const socialLinks = get("global.socialLinks", []);
+  const notificationEmailLines = listToEmailLines(get("global.email.notificationEmails", []));
   const navItems = get("global.navigation.menuItems", []);
   const bookingServices = get("pages.booking.services", []);
   const bookingBudgets = get("pages.booking.budgets", []);
@@ -364,6 +393,89 @@ export default function SettingsPage() {
                 <Wand2 className="h-4 w-4" />
                 Generate WhatsApp links
               </button>
+            </SettingsSection>
+          )}
+
+          {active === "email" && (
+            <SettingsSection title="cPanel Email Setup" description="Send website enquiries, booking requests, test emails, and optional client replies through your cPanel mailbox.">
+              <div className="admin-toggle-grid">
+                <ToggleRow
+                  label="Enable website email"
+                  checked={Boolean(get("global.email.enabled", false))}
+                  onChange={(value) => update("global.email.enabled", value)}
+                  help="When enabled, contact and booking submissions will try to send email after saving to admin."
+                />
+                <ToggleRow
+                  label="Admin notifications"
+                  checked={Boolean(get("global.email.adminNotifications", true))}
+                  onChange={(value) => update("global.email.adminNotifications", value)}
+                  help="Send every new enquiry and booking request to the notification inboxes."
+                />
+                <ToggleRow
+                  label="Client auto-replies"
+                  checked={Boolean(get("global.email.clientAutoReplies", false))}
+                  onChange={(value) => update("global.email.clientAutoReplies", value)}
+                  help="Send a simple confirmation email to the client after they submit a form."
+                />
+                <ToggleRow
+                  label="SSL/TLS"
+                  checked={Boolean(get("global.email.smtpSecure", true))}
+                  onChange={(value) => update("global.email.smtpSecure", value)}
+                  help="Use port 465 with SSL/TLS for most cPanel mailboxes. Use 587 only if your host tells you to."
+                />
+              </div>
+
+              <div className="admin-email-note">
+                <Mail className="h-5 w-5" />
+                <div>
+                  <strong>Server values stay in cPanel</strong>
+                  <p>
+                    Put the live SMTP host, username, recipients, and real mailbox password in <code>public_html/api/email-config.php</code>. Do not save the password inside the website admin.
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-form-grid">
+                <Field label="SMTP host" value={get("global.email.smtpHost")} onChange={(value) => update("global.email.smtpHost", value)} placeholder="mail.yourdomain.co.za" help="Find this in cPanel Email Accounts > Connect Devices > SMTP settings." />
+                <Field label="SMTP port" type="number" value={get("global.email.smtpPort", 465)} onChange={(value) => update("global.email.smtpPort", Number(value))} help="Usually 465 for SSL or 587 for TLS." />
+                <Field label="SMTP username" type="email" value={get("global.email.smtpUsername")} onChange={(value) => update("global.email.smtpUsername", value)} placeholder="info@yourdomain.co.za" />
+                <Field label="Password server variable" value={get("global.email.passwordSecretName", "CPANEL_SMTP_PASS")} onChange={(value) => update("global.email.passwordSecretName", value)} help="Optional fallback name for hosts that expose environment variables. On cPanel, use api/email-config.php for the real password." />
+                <Field label="From name" value={get("global.email.fromName")} onChange={(value) => update("global.email.fromName", value)} />
+                <Field label="From email" type="email" value={get("global.email.fromEmail")} onChange={(value) => update("global.email.fromEmail", value)} />
+                <Field label="Reply-to email" type="email" value={get("global.email.replyToEmail")} onChange={(value) => update("global.email.replyToEmail", value)} />
+                <Field label="Test recipient" type="email" value={get("global.email.testRecipient")} onChange={(value) => update("global.email.testRecipient", value)} help="On cPanel, api/email-config.php controls where test messages go." />
+                <div className="md:col-span-2">
+                  <Field
+                    label="Notification emails"
+                    multiline
+                    value={notificationEmailLines}
+                    onChange={(value) => update("global.email.notificationEmails", emailLinesToList(value))}
+                    help="One email per line. These receive contact and booking notifications."
+                  />
+                </div>
+                <Field label="Contact notification subject" value={get("global.email.contactSubject")} onChange={(value) => update("global.email.contactSubject", value)} />
+                <Field label="Booking notification subject" value={get("global.email.bookingSubject")} onChange={(value) => update("global.email.bookingSubject", value)} />
+                <Field label="Contact auto-reply subject" value={get("global.email.contactAutoReplySubject")} onChange={(value) => update("global.email.contactAutoReplySubject", value)} />
+                <Field label="Booking auto-reply subject" value={get("global.email.bookingAutoReplySubject")} onChange={(value) => update("global.email.bookingAutoReplySubject", value)} />
+                <div className="md:col-span-2">
+                  <Field label="Contact auto-reply message" multiline value={get("global.email.contactAutoReplyMessage")} onChange={(value) => update("global.email.contactAutoReplyMessage", value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Field label="Booking auto-reply message" multiline value={get("global.email.bookingAutoReplyMessage")} onChange={(value) => update("global.email.bookingAutoReplyMessage", value)} help="Use {reference} to include the booking reference." />
+                </div>
+              </div>
+
+              <div className="admin-email-test-row">
+                <button type="button" onClick={handleEmailTest} disabled={testingEmail || !get("global.email.enabled", false)} className="admin-settings-tool">
+                  <Send className="h-4 w-4" />
+                  {testingEmail ? "Sending..." : "Send test email"}
+                </button>
+                {emailTest && (
+                  <p className={`admin-email-status is-${emailTest.type}`}>
+                    {emailTest.message}
+                  </p>
+                )}
+              </div>
             </SettingsSection>
           )}
 

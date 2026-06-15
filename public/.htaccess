@@ -1,0 +1,11 @@
+Options -MultiViews
+
+RewriteEngine On
+
+# Let real files and directories load normally, including /api/send-email.php.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# React Router fallback for pages such as /portfolio and /admin/login.
+RewriteRule ^ index.html [L]
