@@ -2,6 +2,8 @@ const DB_KEY = "ikulungwane_local_db";
 const USERS_KEY = "ikulungwane_local_users";
 const SESSION_KEY = "ikulungwane_local_session";
 const RESET_KEY = "ikulungwane_local_resets";
+const AUTH_ENDPOINT = "/api/auth.php";
+const SETUP_ENDPOINT = "/api/setup.php";
 
 const ENTITY_NAMES = [
   "BlogPost",
@@ -217,6 +219,55 @@ const redirectTo = (url) => {
   }
 };
 
+const parseApiJson = async (response) => {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    const error = new Error("Backend API is not available");
+    error.unavailable = true;
+    error.status = response.status;
+    throw error;
+  }
+};
+
+const backendRequest = async (endpoint, action, { method = "GET", body } = {}) => {
+  const response = await fetch(`${endpoint}?action=${encodeURIComponent(action)}`, {
+    method,
+    credentials: "include",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await parseApiJson(response);
+
+  if (!response.ok) {
+    const error = new Error(data.error || "Backend request failed");
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
+
+const getBackendInstallStatus = async () => {
+  try {
+    return await backendRequest(SETUP_ENDPOINT, "status");
+  } catch (error) {
+    if (error.unavailable || error instanceof TypeError) {
+      return { available: false, installed: false };
+    }
+    throw error;
+  }
+};
+
+const backendAuth = async (action, body) =>
+  backendRequest(AUTH_ENDPOINT, action, {
+    method: body ? "POST" : "GET",
+    body,
+  });
+
 export const localApi = {
   entities: ENTITY_NAMES.reduce((entities, entityName) => {
     entities[entityName] = createEntityApi(entityName);
@@ -248,6 +299,15 @@ export const localApi = {
 
   auth: {
     async me() {
+      try {
+        const result = await backendAuth("me");
+        if (result.user) return result.user;
+      } catch (error) {
+        if (!error.unavailable && error.status === 401) {
+          throw error;
+        }
+      }
+
       const user = getSessionUser();
       if (!user) {
         const error = new Error("Not signed in");
@@ -259,6 +319,15 @@ export const localApi = {
     },
 
     async loginViaEmailPassword(email, password) {
+      try {
+        const result = await backendAuth("login", { email, password });
+        if (result.user) return result.user;
+      } catch (error) {
+        if (!error.unavailable && error.status) {
+          throw error;
+        }
+      }
+
       const normalizedEmail = normalizeEmail(email);
       const user = getUsers().find(
         (item) => item.email === normalizedEmail && item.password === password
@@ -273,6 +342,13 @@ export const localApi = {
     },
 
     async hasAdminAccount() {
+      try {
+        const status = await getBackendInstallStatus();
+        if (status.available) return Boolean(status.installed);
+      } catch {
+        // Fall back to local development storage.
+      }
+
       return getUsers().some((user) => user.role === "admin");
     },
 
@@ -436,6 +512,7 @@ export const localApi = {
     },
 
     logout(redirectUrl) {
+      backendAuth("logout").catch(() => {});
       writeJson(SESSION_KEY, null);
       const storage = getStorage();
       storage?.removeItem(SESSION_KEY);

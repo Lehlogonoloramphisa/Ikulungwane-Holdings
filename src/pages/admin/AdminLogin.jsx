@@ -18,6 +18,7 @@ import { localApi } from "@/api/localClient";
 import { useAuth } from "@/lib/AuthContext";
 import { applyBrandingVariables } from "@/lib/branding";
 import { useCms } from "@/lib/cms";
+import { getSetupStatus } from "@/lib/setupApi";
 
 const safeAdminRedirect = (value) => {
   const isAdminPath = value === "/admin" || value?.startsWith("/admin/") || value?.startsWith("/admin?");
@@ -52,9 +53,28 @@ export default function AdminLogin() {
   useEffect(() => {
     let mounted = true;
 
-    localApi.auth.hasAdminAccount()
-      .then((exists) => {
-        if (mounted) setSetupMode(!exists);
+    getSetupStatus()
+      .then((status) => {
+        if (!mounted) return;
+        if (status.available && !status.installed) {
+          navigate("/setup", { replace: true });
+          return;
+        }
+        if (status.available && status.installed) {
+          setSetupMode(false);
+          return;
+        }
+
+        localApi.auth.hasAdminAccount()
+          .then((exists) => {
+            if (mounted) setSetupMode(!exists);
+          })
+          .catch(() => {
+            if (mounted) setSetupMode(false);
+          })
+          .finally(() => {
+            if (mounted) setCheckingSetup(false);
+          });
       })
       .catch(() => {
         if (mounted) setSetupMode(false);
@@ -66,7 +86,7 @@ export default function AdminLogin() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (authChecked && isAuthenticated && user?.role === "admin") {

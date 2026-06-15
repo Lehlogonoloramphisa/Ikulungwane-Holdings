@@ -1,6 +1,6 @@
 # Ikulungwane React Site
 
-This is a standalone React + Vite version of the Ikulungwane Holdings website.
+This is a React + Vite version of the Ikulungwane Holdings website with a cPanel/PHP installer for first-time setup.
 
 ## Run Locally
 
@@ -26,6 +26,40 @@ npm run build
 Upload the contents of `dist` into your cPanel `public_html` folder. Upload the contents inside `dist`, not the `dist` folder itself.
 
 The build includes a cPanel `.htaccess` file so React routes like `/portfolio`, `/contact`, and `/admin/login` continue to work after refresh.
+
+## First-Time Installer
+
+After uploading to cPanel, open:
+
+```text
+https://yourdomain.com/setup
+```
+
+The installer wizard uses these routes:
+
+- `/setup`
+- `/setup/database`
+- `/setup/admin`
+- `/setup/site`
+- `/setup/finish`
+
+The setup flow:
+
+1. Welcome
+2. System Requirements
+3. Database Setup
+4. Admin Account
+5. Website Settings
+6. Finish Installation
+
+The installer collects database credentials, creates the database tables, creates the first `super_admin`, saves website settings, writes the server-side database config to `public_html/api/config/database.php`, inserts the `installed=true` flag, then redirects to `/admin/login`.
+
+For security:
+
+- Database credentials are posted to `public_html/api/setup.php`.
+- The database password is not stored in frontend code.
+- Setup does not use `localStorage` for database configuration.
+- After `installed=true`, `/setup` redirects to `/admin/login` for normal visitors.
 
 ## cPanel Email
 
@@ -67,8 +101,8 @@ In `email-config.php`, those become:
 
 Then open **Admin -> Settings -> Email**, enable website email, save, and use **Send test email**.
 
-## Local Data
+## Local Development
 
-Public pages, contact forms, bookings, and admin CRUD screens use browser `localStorage` through `src/api/localClient.js`.
+The local Vite server does not execute PHP, so `/setup` can display the wizard but cannot complete installation locally unless you run it behind a PHP server.
 
-Data entered in the admin area is stored in the current browser only. Clearing site data will reset the local content.
+When PHP is unavailable, public pages, contact forms, bookings, and admin CRUD screens still use browser `localStorage` through `src/api/localClient.js` for development fallback.

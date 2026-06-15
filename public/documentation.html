@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ikulungwane Holdings - Setup Documentation</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --paper: #ffffff;
+      --ink: #171717;
+      --muted: #666666;
+      --line: #dddddd;
+      --accent: #e11d2e;
+      --soft: #fff1f2;
+      --code: #111111;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #111111;
+      color: #ffffff;
+      padding: 28px 22px;
+    }
+
+    aside h1 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    aside p {
+      margin: 10px 0 22px;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+    }
+
+    nav {
+      display: grid;
+      gap: 4px;
+    }
+
+    nav a {
+      border-radius: 6px;
+      padding: 9px 10px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      padding: 42px clamp(18px, 5vw, 72px) 80px;
+    }
+
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 34px;
+      margin-bottom: 34px;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .hero h2 {
+      max-width: 860px;
+      margin: 10px 0;
+      font-size: clamp(38px, 7vw, 86px);
+      line-height: 0.92;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    section {
+      margin: 42px 0;
+      scroll-margin-top: 20px;
+    }
+
+    h3 {
+      margin: 0 0 14px;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h4 {
+      margin: 26px 0 8px;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    ul,
+    ol {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 7px 0;
+    }
+
+    code {
+      border-radius: 4px;
+      background: #eeeeee;
+      padding: 2px 5px;
+      color: #111111;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 0.94em;
+    }
+
+    pre {
+      overflow-x: auto;
+      border-radius: 8px;
+      background: var(--code);
+      padding: 16px;
+      color: #f8f8f8;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 20px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.045);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 16px 18px;
+    }
+
+    .warning {
+      border-left-color: #b45309;
+      background: #fffbeb;
+    }
+
+    .success {
+      border-left-color: #15803d;
+      background: #f0fdf4;
+    }
+
+    .system-map {
+      display: grid;
+      gap: 12px;
+    }
+
+    .map-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .map-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 16px;
+    }
+
+    .map-box strong {
+      display: block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .map-arrow {
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 12px 14px;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      margin-right: 8px;
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      margin-top: 54px;
+      padding-top: 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: relative;
+        height: auto;
+      }
+
+      nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid,
+      .grid-3,
+      .map-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <h1>Ikulungwane Setup Guide</h1>
+      <p>Beginner-friendly installation, deployment, and system map.</p>
+      <nav aria-label="Documentation navigation">
+        <a href="#overview">Overview</a>
+        <a href="#requirements">Requirements</a>
+        <a href="#local">Local Setup</a>
+        <a href="#cpanel">cPanel Deployment</a>
+        <a href="#installer">Installer Wizard</a>
+        <a href="#email">Email Setup</a>
+        <a href="#admin">Admin Area</a>
+        <a href="#map">System Map</a>
+        <a href="#routes">Routes</a>
+        <a href="#database">Database</a>
+        <a href="#security">Security</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="hero">
+        <span class="kicker">Project Documentation</span>
+        <h2>Ikulungwane Holdings Website Setup</h2>
+        <p>
+          This document explains how to install, deploy, and manage the Ikulungwane Holdings system.
+          It is written for someone with little to no technical experience, but it also maps the
+          important system parts for future developers.
+        </p>
+      </div>
+
+      <section id="overview">
+        <h3>1. What This System Is</h3>
+        <div class="grid">
+          <div class="card">
+            <h4>Public Website</h4>
+            <p>The public website is built with React and Vite. It includes pages such as Home, Portfolio, Services, About, Journal, Contact, and Book a Session.</p>
+          </div>
+          <div class="card">
+            <h4>Admin System</h4>
+            <p>The admin area lets the owner manage portfolio items, services, testimonials, journal posts, team members, bookings, leads, page content, branding, and settings.</p>
+          </div>
+          <div class="card">
+            <h4>Installer Wizard</h4>
+            <p>The installer lives at <code>/setup</code>. It collects database details, creates tables, creates the first admin, saves website settings, and locks itself after installation.</p>
+          </div>
+          <div class="card">
+            <h4>cPanel Backend</h4>
+            <p>The backend is PHP inside <code>public_html/api</code>. It handles setup, login, email sending, and secure server-only configuration.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="requirements">
+        <h3>2. What You Need</h3>
+        <div class="grid">
+          <div class="card">
+            <h4>For Local Work</h4>
+            <ul>
+              <li>A computer with Windows, macOS, or Linux.</li>
+              <li>Node.js 18 or newer.</li>
+              <li>npm, included with Node.js.</li>
+              <li>Git, if you want to pull or push from GitHub.</li>
+              <li>A code editor such as VS Code.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>For cPanel Hosting</h4>
+            <ul>
+              <li>cPanel hosting account.</li>
+              <li>PHP 8.0 or newer.</li>
+              <li>PDO extension enabled.</li>
+              <li>PDO MySQL driver enabled.</li>
+              <li>MySQL or MariaDB database.</li>
+              <li>Apache rewrite support for <code>.htaccess</code>.</li>
+              <li>cPanel email account if website email is required.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Beginner note:</strong> If you are deploying to cPanel, you do not need to install Node.js on the server.
+          You build the site on your computer, then upload the finished <code>dist</code> files to <code>public_html</code>.
+        </div>
+      </section>
+
+      <section id="local">
+        <h3>3. Local Setup On Your Computer</h3>
+        <ol>
+          <li>Open the project folder on your computer.</li>
+          <li>Open a terminal in the project folder.</li>
+          <li>Install the project packages:</li>
+        </ol>
+        <pre><code>npm install</code></pre>
+        <ol start="4">
+          <li>Start the development server:</li>
+        </ol>
+        <pre><code>npm run dev</code></pre>
+        <ol start="5">
+          <li>Open the local URL shown in the terminal, usually:</li>
+        </ol>
+        <pre><code>http://127.0.0.1:5173</code></pre>
+
+        <div class="callout warning">
+          <strong>Important:</strong> The local Vite server does not run PHP. The installer page can open locally,
+          but database installation must be tested on a PHP/cPanel server or a local PHP server.
+        </div>
+      </section>
+
+      <section id="cpanel">
+        <h3>4. Deploy To cPanel</h3>
+        <h4>Step A: Build The Website</h4>
+        <p>Run this command on your computer:</p>
+        <pre><code>npm run build</code></pre>
+        <p>This creates a folder named <code>dist</code>. That folder contains the final website files.</p>
+
+        <h4>Step B: Upload To cPanel</h4>
+        <ol>
+          <li>Log in to cPanel.</li>
+          <li>Open <strong>File Manager</strong>.</li>
+          <li>Open the <code>public_html</code> folder.</li>
+          <li>Upload everything inside the <code>dist</code> folder into <code>public_html</code>.</li>
+          <li>Do not upload the <code>dist</code> folder itself. Upload the files inside it.</li>
+        </ol>
+
+        <h4>Step C: Confirm Important Files Exist</h4>
+        <ul class="checklist">
+          <li><code>public_html/index.html</code></li>
+          <li><code>public_html/.htaccess</code></li>
+          <li><code>public_html/assets</code></li>
+          <li><code>public_html/api/setup.php</code></li>
+          <li><code>public_html/api/auth.php</code></li>
+          <li><code>public_html/api/send-email.php</code></li>
+          <li><code>public_html/api/config/.htaccess</code></li>
+        </ul>
+
+        <h4>Step D: Create The Database In cPanel</h4>
+        <ol>
+          <li>In cPanel, open <strong>MySQL Databases</strong>.</li>
+          <li>Create a new database. Example: <code>cpaneluser_ikulungwane</code>.</li>
+          <li>Create a new database user. Example: <code>cpaneluser_ikuadmin</code>.</li>
+          <li>Give the user a strong password. Save it somewhere safe for the installer.</li>
+          <li>Add the user to the database.</li>
+          <li>Give the user <strong>All Privileges</strong>.</li>
+        </ol>
+      </section>
+
+      <section id="installer">
+        <h3>5. Run The Installer Wizard</h3>
+        <p>After uploading the site to cPanel, open:</p>
+        <pre><code>https://yourdomain.com/setup</code></pre>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Route</th>
+              <th>What It Does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Welcome</td>
+              <td><code>/setup</code></td>
+              <td>Explains what the installer will do.</td>
+            </tr>
+            <tr>
+              <td>2. System Requirements</td>
+              <td><code>/setup</code></td>
+              <td>Checks PHP, PDO, PDO MySQL, JSON, sessions, and writable config folder.</td>
+            </tr>
+            <tr>
+              <td>3. Database Setup</td>
+              <td><code>/setup/database</code></td>
+              <td>Collects database host, port, database name, username, and password. Tests the connection.</td>
+            </tr>
+            <tr>
+              <td>4. Admin Account</td>
+              <td><code>/setup/admin</code></td>
+              <td>Creates the first super admin account.</td>
+            </tr>
+            <tr>
+              <td>5. Website Settings</td>
+              <td><code>/setup/site</code></td>
+              <td>Collects site name, logo, phone, email, address, and WhatsApp number.</td>
+            </tr>
+            <tr>
+              <td>6. Finish Installation</td>
+              <td><code>/setup/finish</code></td>
+              <td>Creates tables, saves settings, marks the system installed, and redirects to admin login.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Database Values The Installer Asks For</h4>
+        <ul>
+          <li><strong>Database host:</strong> usually <code>localhost</code>.</li>
+          <li><strong>Database port:</strong> usually <code>3306</code>.</li>
+          <li><strong>Database name:</strong> the name created in cPanel.</li>
+          <li><strong>Database username:</strong> the database user created in cPanel.</li>
+          <li><strong>Database password:</strong> the password for that database user.</li>
+        </ul>
+
+        <div class="callout success">
+          After installation, the system saves <code>installed=true</code> in the <code>system_settings</code> table.
+          Normal visitors cannot use <code>/setup</code> after that.
+        </div>
+      </section>
+
+      <section id="email">
+        <h3>6. Set Up cPanel Email</h3>
+        <p>The contact and booking forms send email using <code>public_html/api/send-email.php</code>.</p>
+
+        <ol>
+          <li>In cPanel, open <strong>Email Accounts</strong>.</li>
+          <li>Create or select the email account, for example <code>info@yourdomain.com</code>.</li>
+          <li>Click <strong>Connect Devices</strong> to see SMTP details.</li>
+          <li>Open <code>public_html/api</code> in File Manager.</li>
+          <li>Copy <code>email-config.example.php</code>.</li>
+          <li>Rename the copy to <code>email-config.php</code>.</li>
+          <li>Edit <code>email-config.php</code> and add the real SMTP details.</li>
+        </ol>
+
+        <pre><code>'smtp_host' => 'mail.yourdomain.com',
+'smtp_port' => 465,
+'smtp_secure' => true,
+'smtp_verify_peer' => true,
+'smtp_username' => 'info@yourdomain.com',
+'smtp_password' => 'your-cpanel-email-password',
+'from_name' => 'Ikulungwane Holdings',
+'from_email' => 'info@yourdomain.com',
+'notification_emails' => ['info@yourdomain.com'],</code></pre>
+
+        <p>After saving the file, log in to admin and go to <strong>Settings - Email</strong>. Enable website email and send a test email.</p>
+      </section>
+
+      <section id="admin">
+        <h3>7. Admin Area</h3>
+        <p>After the installer finishes, it redirects to:</p>
+        <pre><code>/admin/login</code></pre>
+
+        <div class="grid">
+          <div class="card">
+            <h4>Content</h4>
+            <ul>
+              <li>Portfolio</li>
+              <li>Services</li>
+              <li>Testimonials</li>
+              <li>Journal</li>
+              <li>Team</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Clients</h4>
+            <ul>
+              <li>Bookings</li>
+              <li>Leads</li>
+              <li>Contact messages</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Website</h4>
+            <ul>
+              <li>Page Builder</li>
+              <li>Logo and favicon</li>
+              <li>Contact details</li>
+              <li>Theme colors</li>
+              <li>Typography</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>System</h4>
+            <ul>
+              <li>Email setup</li>
+              <li>Navigation links</li>
+              <li>SEO details</li>
+              <li>Legal footer links</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="map">
+        <h3>8. System Map</h3>
+        <div class="system-map">
+          <div class="map-row">
+            <div class="map-box">
+              <strong>Visitor</strong>
+              <p>Views public pages, submits contact forms, or books a session.</p>
+            </div>
+            <div class="map-box">
+              <strong>React Frontend</strong>
+              <p>Displays pages, admin UI, page builder, and installer wizard.</p>
+            </div>
+            <div class="map-box">
+              <strong>PHP API</strong>
+              <p>Runs setup, login, email sending, and server-side database work.</p>
+            </div>
+            <div class="map-box">
+              <strong>MySQL Database</strong>
+              <p>Stores install flag, admin user, content, bookings, leads, and settings.</p>
+            </div>
+          </div>
+        </div>
+
+        <h4>Main Flow</h4>
+        <p>
+          Browser <span class="map-arrow">-></span> React app
+          <span class="map-arrow">-></span> PHP API
+          <span class="map-arrow">-></span> MySQL database.
+        </p>
+
+        <h4>Important Folders</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Folder/File</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>src</code></td>
+              <td>React source code for pages, components, admin, and setup wizard.</td>
+            </tr>
+            <tr>
+              <td><code>public</code></td>
+              <td>Static files copied into the final build.</td>
+            </tr>
+            <tr>
+              <td><code>public/api</code></td>
+              <td>PHP backend endpoints for cPanel hosting.</td>
+            </tr>
+            <tr>
+              <td><code>public/api/config</code></td>
+              <td>Protected server config folder. The installer writes database credentials here.</td>
+            </tr>
+            <tr>
+              <td><code>database/mysql</code></td>
+              <td>MySQL install flag schema reference.</td>
+            </tr>
+            <tr>
+              <td><code>database/postgres</code></td>
+              <td>Postgres schema reference for future hosted backends.</td>
+            </tr>
+            <tr>
+              <td><code>dist</code></td>
+              <td>Final build folder created by <code>npm run build</code>. Upload its contents to cPanel.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="routes">
+        <h3>9. Route Map</h3>
+        <div class="grid">
+          <div class="card">
+            <h4>Public Routes</h4>
+            <ul>
+              <li><code>/</code> - Home</li>
+              <li><code>/portfolio</code> - Portfolio</li>
+              <li><code>/services</code> - Services</li>
+              <li><code>/about</code> - About</li>
+              <li><code>/blog</code> - Journal</li>
+              <li><code>/contact</code> - Contact</li>
+              <li><code>/booking</code> - Book a Session</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Setup Routes</h4>
+            <ul>
+              <li><code>/setup</code></li>
+              <li><code>/setup/database</code></li>
+              <li><code>/setup/admin</code></li>
+              <li><code>/setup/site</code></li>
+              <li><code>/setup/finish</code></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Admin Routes</h4>
+            <ul>
+              <li><code>/admin/login</code></li>
+              <li><code>/admin</code></li>
+              <li><code>/admin/page-builder</code></li>
+              <li><code>/admin/portfolio</code></li>
+              <li><code>/admin/services</code></li>
+              <li><code>/admin/bookings</code></li>
+              <li><code>/admin/leads</code></li>
+              <li><code>/admin/settings</code></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Backend API Routes</h4>
+            <ul>
+              <li><code>/api/setup.php</code></li>
+              <li><code>/api/auth.php</code></li>
+              <li><code>/api/send-email.php</code></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="database">
+        <h3>10. Database Tables</h3>
+        <p>The installer creates the required tables automatically. The most important table is the install flag table:</p>
+        <pre><code>CREATE TABLE system_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);</code></pre>
+        <p>After installation, the system inserts:</p>
+        <pre><code>INSERT INTO system_settings (setting_key, setting_value)
+VALUES ('installed', 'true');</code></pre>
+
+        <h4>Main Tables</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Stores</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>system_settings</code></td><td>Install flag and core system values.</td></tr>
+            <tr><td><code>app_users</code></td><td>Admin and user accounts with hashed passwords.</td></tr>
+            <tr><td><code>site_settings</code></td><td>Global website settings.</td></tr>
+            <tr><td><code>page_content</code></td><td>Page builder content.</td></tr>
+            <tr><td><code>portfolio_projects</code></td><td>Portfolio work.</td></tr>
+            <tr><td><code>services</code></td><td>Services and package information.</td></tr>
+            <tr><td><code>testimonials</code></td><td>Client reviews.</td></tr>
+            <tr><td><code>blog_posts</code></td><td>Journal posts.</td></tr>
+            <tr><td><code>team_members</code></td><td>Team profiles.</td></tr>
+            <tr><td><code>bookings</code></td><td>Booking requests.</td></tr>
+            <tr><td><code>contact_messages</code></td><td>Contact form leads.</td></tr>
+            <tr><td><code>email_delivery_logs</code></td><td>Future email delivery tracking.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="security">
+        <h3>11. Security Notes</h3>
+        <ul class="checklist">
+          <li>Do not put database passwords in React files.</li>
+          <li>Do not store database setup details in localStorage.</li>
+          <li>Use the installer because it sends database details to PHP only.</li>
+          <li>Keep <code>public_html/api/config/database.php</code> protected.</li>
+          <li>Use a strong admin password with at least 8 characters.</li>
+          <li>After installation, <code>/setup</code> is blocked for normal visitors.</li>
+          <li>Only a logged-in super admin should reopen setup tools.</li>
+          <li>Do not commit real <code>email-config.php</code> or <code>database.php</code> files to GitHub.</li>
+        </ul>
+      </section>
+
+      <section id="troubleshooting">
+        <h3>12. Troubleshooting</h3>
+        <div class="grid">
+          <div class="card">
+            <h4>/setup shows API not available</h4>
+            <p>You are probably viewing the local Vite server. PHP does not run there. Upload the build to cPanel or run the project behind a PHP server.</p>
+          </div>
+          <div class="card">
+            <h4>Database connection fails</h4>
+            <p>Check database name, username, password, host, and port. On cPanel the database and username often start with your cPanel username.</p>
+          </div>
+          <div class="card">
+            <h4>Pages 404 after refresh</h4>
+            <p>Make sure <code>.htaccess</code> was uploaded to <code>public_html</code>. Some file managers hide dotfiles by default.</p>
+          </div>
+          <div class="card">
+            <h4>Email test fails</h4>
+            <p>Check <code>email-config.php</code>. If your host has certificate issues, try setting <code>'smtp_verify_peer' => false</code>.</p>
+          </div>
+          <div class="card">
+            <h4>Admin login fails</h4>
+            <p>Make sure installation finished successfully and the first admin account was created. Check the <code>app_users</code> table.</p>
+          </div>
+          <div class="card">
+            <h4>Installer says config is not writable</h4>
+            <p>Make sure <code>public_html/api/config</code> exists and is writable by PHP. Ask your host if you are unsure.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>Ikulungwane Holdings system documentation. Keep this file with the project for future handovers and hosting support.</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

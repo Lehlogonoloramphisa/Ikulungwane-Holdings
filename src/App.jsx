@@ -1,11 +1,13 @@
 import { Toaster } from "@/components/ui/toaster"
+import { useEffect, useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from '@/components/ScrollToTop';
+import { getSetupStatus } from '@/lib/setupApi';
 
 // Layout
 import SiteLayout from './components/layout/SiteLayout';
@@ -26,6 +28,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SetupWizard from './pages/setup/SetupWizard';
 
 // Admin Pages
 import Dashboard from './pages/admin/Dashboard';
@@ -42,6 +45,24 @@ import AdminLogin from './pages/admin/AdminLogin';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const location = useLocation();
+  const [installStatus, setInstallStatus] = useState({ loading: true, available: false, installed: true });
+
+  useEffect(() => {
+    let mounted = true;
+
+    getSetupStatus()
+      .then((status) => {
+        if (mounted) setInstallStatus({ loading: false, ...status });
+      })
+      .catch(() => {
+        if (mounted) setInstallStatus({ loading: false, available: false, installed: true });
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -60,8 +81,15 @@ const AuthenticatedApp = () => {
     }
   }
 
+  if (!installStatus.loading && installStatus.available && !installStatus.installed && !location.pathname.startsWith("/setup")) {
+    return <Navigate to="/setup" replace />;
+  }
+
   return (
     <Routes>
+      {/* Installer */}
+      <Route path="/setup/*" element={<SetupWizard installStatus={installStatus} />} />
+
       {/* Local Auth Pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
