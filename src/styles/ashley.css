@@ -12,12 +12,12 @@
   --ashley-charcoal-2: #171715;
   --ashley-forest: #092d2b;
   --ashley-teal: #39d6c2;
-  --site-logo-text-size: 24px;
-  --site-footer-logo-text-size: 30px;
+  --site-logo-text-size: 22px;
+  --site-footer-logo-text-size: 28px;
   --site-nav-text-size: 11px;
-  --site-hero-heading-size: 88px;
-  --site-section-heading-size: 52px;
-  --site-body-text-size: 16px;
+  --site-hero-heading-size: 72px;
+  --site-section-heading-size: 42px;
+  --site-body-text-size: 15px;
 }
 
 html {
@@ -27,6 +27,19 @@ html {
 body {
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--site-body-text-size);
+}
+
+:where(.ashley-shell, .interior-page) :where(h1, h2, h3, h4, p, span, em, strong, a, button) {
+  min-width: 0;
+}
+
+:where(.ashley-shell, .interior-page) :where(h1, h2, h3, h4) {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+:where(.ashley-shell, .interior-page) :where(p, span, em) {
+  overflow-wrap: break-word;
 }
 
 .ashley-shell {
@@ -82,7 +95,11 @@ body {
 .ashley-display {
   font-family: var(--font-display), var(--font-heading), system-ui, sans-serif;
   letter-spacing: 0;
-  line-height: 0.94;
+  line-height: 0.98;
+}
+
+.ashley-section .ashley-display {
+  font-size: clamp(38px, 5.8vw, min(var(--site-hero-heading-size), 72px));
 }
 
 .site-brand {
@@ -148,6 +165,10 @@ body {
   height: 13px;
 }
 
+.site-menu-cta {
+  width: 100%;
+}
+
 .site-footer-logo,
 .site-footer-logo-text {
   margin-bottom: 4px;
@@ -173,6 +194,38 @@ body {
 @media (min-width: 640px) {
   .site-brand-subtitle {
     display: block;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-header-nav {
+    width: min(calc(100% - 24px), 1460px);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .site-header-actions {
+    gap: 8px;
+  }
+
+  .site-header-cta {
+    min-height: 32px;
+    gap: 5px;
+    padding: 7px 10px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .site-header-cta svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .site-menu-cta {
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
   }
 }
 
@@ -525,7 +578,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .ashley-menu-link {
   display: inline-flex;
   color: rgba(255, 255, 255, 0.45);
-  font-size: clamp(42px, 8vw, 98px);
+  font-size: clamp(36px, 6.4vw, 82px);
   font-weight: 700;
   letter-spacing: 0;
   line-height: 0.96;
@@ -655,9 +708,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 760px;
   margin: 0;
   color: white;
-  font-size: 72px;
+  font-size: clamp(38px, 4.8vw, 60px);
   font-weight: 900;
-  line-height: 0.94;
+  line-height: 0.98;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -779,8 +832,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   z-index: 1;
   width: 100vw;
   margin: 0;
-  color: rgba(255, 255, 255, 0.075);
-  font-size: 180px;
+  color: rgba(255, 255, 255, 0.055);
+  font-size: clamp(84px, 11vw, 150px);
   font-weight: 900;
   line-height: 0.82;
   text-align: center;
@@ -801,8 +854,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 620px;
   margin-top: 28px;
   color: rgba(255, 255, 255, 0.56);
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.7;
 }
 
 .cinema-intro-image {
@@ -1077,7 +1130,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .cinema-case-content h2 {
   margin: 0;
   color: white;
-  font-size: 88px;
+  font-size: clamp(42px, 5.2vw, 68px);
   font-weight: 900;
   line-height: 0.9;
   text-transform: uppercase;
@@ -1089,13 +1142,13 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 620px;
   margin-top: 28px;
   color: rgba(255, 255, 255, 0.62);
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.7;
 }
 
 @media (min-width: 1600px) {
   .cinema-background-title {
-    font-size: 220px;
+    font-size: 160px;
   }
 }
 
@@ -1115,11 +1168,11 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-transition-copy h2,
   .cinema-intro-copy h3,
   .cinema-sticky-item h3 {
-    font-size: 54px;
+    font-size: 46px;
   }
 
   .cinema-background-title {
-    font-size: 140px;
+    font-size: 110px;
   }
 
   .cinema-sticky-showcase {
@@ -1146,7 +1199,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-transition-copy h2,
   .cinema-intro-copy h3,
   .cinema-sticky-item h3 {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .cinema-transition-frame,
@@ -1155,7 +1208,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .cinema-background-title {
-    font-size: 72px;
+    font-size: 58px;
     top: 18%;
   }
 
@@ -1264,7 +1317,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   right: -2vw;
   top: 5vh;
   color: rgba(255, 255, 255, 0.045);
-  font-size: clamp(92px, 18vw, 260px);
+  font-size: clamp(72px, 13vw, 170px);
   font-weight: 900;
   line-height: 0.8;
   text-transform: uppercase;
@@ -1291,9 +1344,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-closing-copy h2 {
   margin: 24px 0;
   color: white;
-  font-size: clamp(44px, 6vw, 86px);
+  font-size: clamp(32px, 4.8vw, 58px);
   font-weight: 900;
-  line-height: 0.92;
+  line-height: 0.98;
   text-transform: uppercase;
   letter-spacing: 0;
 }
@@ -1303,8 +1356,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-closing-copy > p:not(.ashley-kicker) {
   max-width: 620px;
   color: rgba(255, 255, 255, 0.58);
-  font-size: 17px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.7;
 }
 
 .studio-principles {
@@ -1427,8 +1480,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .studio-process-board {
   display: grid;
-  grid-template-columns: minmax(360px, 0.85fr) minmax(0, 1fr);
-  gap: 6vw;
+  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1fr);
+  gap: clamp(32px, 4.2vw, 58px);
   align-items: stretch;
 }
 
@@ -1474,14 +1527,14 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .studio-process-steps button {
   display: grid;
-  grid-template-columns: 56px max-content minmax(0, 1fr);
-  gap: clamp(20px, 2.6vw, 34px);
+  grid-template-columns: 42px max-content minmax(0, 1fr);
+  gap: clamp(10px, 1.2vw, 16px);
   width: 100%;
-  min-height: 160px;
+  min-height: 132px;
   align-items: start;
   border: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 34px 0;
+  padding: 24px 0;
   background: transparent;
   color: white;
   text-align: left;
@@ -1509,7 +1562,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-process-steps strong {
   min-width: 0;
   color: white;
-  font-size: clamp(28px, 3.7vw, 50px);
+  font-size: clamp(24px, 2.4vw, 34px);
   font-weight: 900;
   line-height: 1.05;
   text-transform: uppercase;
@@ -1521,13 +1574,14 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-process-steps em {
   min-width: 0;
   max-width: 720px;
-  padding-top: clamp(10px, 1.4vw, 18px);
+  padding-top: 4px;
   padding-left: 0;
   color: rgba(255, 255, 255, 0.56);
   font-size: 15px;
   font-style: normal;
-  line-height: 1.75;
+  line-height: 1.6;
   overflow-wrap: anywhere;
+  transform: translateY(6px);
 }
 
 .studio-services-section {
@@ -1591,7 +1645,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .studio-service-index strong {
   color: white;
-  font-size: clamp(24px, 4vw, 48px);
+  font-size: clamp(22px, 3vw, 34px);
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
@@ -1641,7 +1695,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-service-preview h3 {
   margin: 12px 0;
   color: white;
-  font-size: clamp(34px, 5vw, 64px);
+  font-size: clamp(30px, 4vw, 48px);
   font-weight: 900;
   line-height: 0.92;
   text-transform: uppercase;
@@ -1722,7 +1776,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-proof-item h3 {
   margin: 0 0 18px;
   color: white;
-  font-size: clamp(28px, 3.4vw, 46px);
+  font-size: clamp(24px, 3vw, 34px);
   font-weight: 900;
   line-height: 0.98;
   text-transform: uppercase;
@@ -1755,7 +1809,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .studio-testimonial-heading h2 {
-  font-size: clamp(42px, 5vw, 74px);
+  font-size: clamp(30px, 4.2vw, 54px);
 }
 
 .studio-testimonial-stage {
@@ -1770,7 +1824,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   right: 0;
   top: -60px;
   color: rgba(255, 255, 255, 0.055);
-  font-size: 260px;
+  font-size: 150px;
   font-weight: 900;
   line-height: 1;
   pointer-events: none;
@@ -1793,7 +1847,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 900px;
   margin: 0;
   color: white;
-  font-size: clamp(34px, 5vw, 76px);
+  font-size: clamp(28px, 4vw, 54px);
   font-weight: 900;
   line-height: 1.02;
   letter-spacing: 0;
@@ -2115,8 +2169,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   right: -4vw;
   top: 12vh;
   z-index: 0;
-  color: rgba(255, 255, 255, 0.035);
-  font-size: clamp(110px, 22vw, 340px);
+  color: rgba(255, 255, 255, 0.028);
+  font-size: clamp(72px, 15vw, 210px);
   font-weight: 900;
   line-height: 0.76;
   text-transform: uppercase;
@@ -2191,7 +2245,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 420px;
   margin-top: 12px;
   color: white;
-  font-size: clamp(28px, 3.6vw, 48px);
+  font-size: clamp(24px, 3vw, 38px);
   font-weight: 900;
   line-height: 0.98;
   text-transform: uppercase;
@@ -2217,7 +2271,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .about-hero-statline strong {
   display: block;
   color: white;
-  font-size: clamp(28px, 4vw, 52px);
+  font-size: clamp(24px, 3vw, 38px);
   font-weight: 900;
   line-height: 1;
 }
@@ -2296,9 +2350,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 980px;
   margin: 24px 0;
   color: white;
-  font-size: clamp(52px, 8vw, 118px);
+  font-size: clamp(38px, 5.8vw, 72px);
   font-weight: 900;
-  line-height: 0.88;
+  line-height: 0.96;
   text-transform: uppercase;
   letter-spacing: 0;
 }
@@ -2307,8 +2361,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   display: block;
   max-width: 660px;
   color: rgba(255, 255, 255, 0.58);
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.65;
 }
 
 .services-hero-frame,
@@ -2709,7 +2763,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .about-stats-section strong {
   display: block;
   color: var(--ashley-accent);
-  font-size: clamp(38px, 5vw, 72px);
+  font-size: clamp(30px, 4vw, 48px);
   font-weight: 900;
   line-height: 1;
 }
@@ -2748,7 +2802,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .journal-hero-feature h2 {
   margin: 12px 0;
   color: white;
-  font-size: clamp(30px, 4vw, 56px);
+  font-size: clamp(28px, 3.4vw, 42px);
   font-weight: 900;
   line-height: 0.96;
   text-transform: uppercase;
@@ -2832,7 +2886,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .journal-post-stream h2 {
   margin: 8px 0 10px;
   color: white;
-  font-size: clamp(28px, 4vw, 58px);
+  font-size: clamp(26px, 3.4vw, 42px);
   font-weight: 900;
   line-height: 0.95;
   text-transform: uppercase;
@@ -2878,7 +2932,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   display: block;
   margin: 14px 0;
   color: var(--ashley-accent);
-  font-size: clamp(76px, 11vw, 140px);
+  font-size: clamp(54px, 7vw, 92px);
   font-weight: 900;
   line-height: 0.8;
 }
@@ -2902,7 +2956,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .contact-info-panel h2 {
-  font-size: clamp(38px, 5vw, 70px);
+  font-size: clamp(30px, 4.4vw, 54px);
 }
 
 .contact-line-list {
@@ -3154,7 +3208,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .interior-hero-copy h1 {
-    font-size: 44px;
+    font-size: 36px;
   }
 
   .service-menu-section,
@@ -3240,7 +3294,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   display: block;
   margin: 16px 0;
   color: var(--ashley-accent);
-  font-size: clamp(86px, 12vw, 150px);
+  font-size: clamp(58px, 8vw, 94px);
   font-weight: 900;
   line-height: 0.78;
 }
@@ -3340,7 +3394,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 760px;
   margin: 14px 0 0;
   color: white;
-  font-size: clamp(38px, 5vw, 76px);
+  font-size: clamp(30px, 4.5vw, 56px);
   font-weight: 900;
   line-height: 0.92;
   text-transform: uppercase;
@@ -3522,7 +3576,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .booking-success-card h1 {
   margin: 24px 0;
   color: white;
-  font-size: clamp(46px, 7vw, 96px);
+  font-size: clamp(34px, 5.5vw, 64px);
   font-weight: 900;
   line-height: 0.9;
   text-transform: uppercase;
@@ -3850,7 +3904,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   right: -28px;
   bottom: -18px;
   color: rgba(255, 255, 255, 0.035);
-  font-size: clamp(54px, 9vw, 142px);
+  font-size: clamp(48px, 7vw, 104px);
   font-weight: 900;
   line-height: 0.8;
   pointer-events: none;
@@ -3860,7 +3914,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   max-width: 880px;
   margin: 18px 0 0;
   color: white;
-  font-size: clamp(34px, 5vw, 68px);
+  font-size: clamp(30px, 4.2vw, 54px);
   font-weight: 900;
   line-height: 0.94;
   text-transform: uppercase;
@@ -4319,11 +4373,11 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .admin-login-art-frame strong {
   display: block;
-  margin-top: clamp(64px, 14vw, 180px);
+  margin-top: clamp(54px, 10vw, 120px);
   max-width: 560px;
   color: white;
   font-family: var(--font-display), var(--font-heading), system-ui, sans-serif;
-  font-size: clamp(48px, 8vw, 104px);
+  font-size: clamp(38px, 6vw, 72px);
   font-weight: 900;
   line-height: 0.88;
   text-transform: uppercase;
@@ -5998,7 +6052,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .builder-inline-edit.is-title,
 .builder-inline-edit.is-ghost {
   min-height: 1.8em;
-  font-size: clamp(34px, 6vw, 80px);
+  font-size: clamp(30px, 5vw, 64px);
   font-weight: 900;
   line-height: 0.95;
   text-transform: uppercase;
@@ -6007,7 +6061,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .builder-inline-edit.is-ghost {
   color: rgba(255, 255, 255, 0.14);
-  font-size: clamp(58px, 9vw, 130px);
+  font-size: clamp(44px, 7vw, 92px);
 }
 
 .builder-inline-edit.is-body {
@@ -6549,12 +6603,12 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .home-studio-flow > .ashley-section:first-of-type .ashley-display {
-  font-size: clamp(44px, 8vw, var(--site-hero-heading-size));
+  font-size: clamp(38px, 5.8vw, min(var(--site-hero-heading-size), 72px));
 }
 
 :where(.interior-hero-copy h1, .booking-success-card h1) {
   font-family: var(--font-display), var(--font-heading), system-ui, sans-serif;
-  font-size: clamp(38px, 8vw, var(--site-hero-heading-size));
+  font-size: clamp(34px, 5.6vw, min(var(--site-hero-heading-size), 72px));
 }
 
 :where(
@@ -6574,7 +6628,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .booking-stage-heading h2
 ) {
   font-family: var(--font-heading), system-ui, sans-serif;
-  font-size: clamp(28px, 5vw, var(--site-section-heading-size));
+  font-size: clamp(24px, 4vw, min(var(--site-section-heading-size), 44px));
 }
 
 @media (max-width: 900px) {
@@ -6585,9 +6639,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 /* Deployment scale guard: keep the public site composed and centered on wide screens. */
 :root {
-  --site-content-max: 1120px;
-  --site-wide-content-max: 1180px;
-  --site-edge-gutter: clamp(24px, 5vw, 64px);
+  --site-content-max: 1040px;
+  --site-wide-content-max: 1120px;
+  --site-edge-gutter: clamp(24px, 5vw, 72px);
   --site-centered-gutter: max(var(--site-edge-gutter), calc((100vw - var(--site-wide-content-max)) / 2));
 }
 
@@ -6633,11 +6687,11 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .home-studio-flow > .ashley-section:first-of-type .ashley-display {
-    font-size: clamp(48px, 6.2vw, 82px);
+    font-size: clamp(42px, 4.8vw, 72px);
   }
 
   :where(.interior-hero-copy h1, .booking-success-card h1) {
-    font-size: clamp(44px, 6vw, 88px);
+    font-size: clamp(38px, 5vw, 72px);
   }
 
   :where(
@@ -6656,7 +6710,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
     .journal-post-stream h2,
     .booking-stage-heading h2
   ) {
-    font-size: clamp(34px, 4.4vw, 64px);
+    font-size: clamp(30px, 3.8vw, 46px);
   }
 
   .studio-about-section,
@@ -6678,7 +6732,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
   .studio-chapter-title {
     right: calc(var(--site-centered-gutter) - 36px);
-    font-size: clamp(82px, 14vw, 188px);
+    font-size: clamp(68px, 10vw, 140px);
   }
 
   .studio-about-inner,
@@ -6722,22 +6776,22 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .studio-testimonial-quote blockquote {
-    font-size: clamp(32px, 4.3vw, 62px);
+    font-size: clamp(28px, 3.8vw, 50px);
   }
 
   .studio-service-index strong,
   .service-menu-index strong {
-    font-size: clamp(24px, 3vw, 38px);
+    font-size: clamp(22px, 2.6vw, 32px);
   }
 
   .studio-process-steps strong {
-    font-size: clamp(26px, 3vw, 40px);
+    font-size: clamp(24px, 2.3vw, 32px);
   }
 
   .studio-process-steps button {
-    min-height: 138px;
-    gap: clamp(16px, 2vw, 26px);
-    padding: 26px 0;
+    min-height: 122px;
+    gap: clamp(10px, 1.2vw, 16px);
+    padding: 22px 0;
   }
 
   .cinema-transition,
@@ -6749,11 +6803,11 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
   .cinema-transition-copy h2,
   .cinema-intro-copy h3 {
-    font-size: clamp(44px, 4.8vw, 64px);
+    font-size: clamp(38px, 4.2vw, 56px);
   }
 
   .cinema-background-title {
-    font-size: clamp(104px, 13vw, 176px);
+    font-size: clamp(88px, 10vw, 140px);
   }
 
   .cinema-transition-frame {
@@ -6805,18 +6859,18 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .cinema-sticky-item h3 {
-    font-size: clamp(42px, 4.8vw, 58px);
+    font-size: clamp(34px, 4vw, 48px);
   }
 
   .cinema-case-content h2 {
-    font-size: clamp(48px, 6vw, 76px);
+    font-size: clamp(42px, 5vw, 64px);
   }
 }
 
 @media (min-width: 1440px) {
   .ashley-shell {
-    --site-content-max: 1080px;
-    --site-wide-content-max: 1160px;
+    --site-content-max: 1040px;
+    --site-wide-content-max: 1120px;
   }
 
   .ashley-button {

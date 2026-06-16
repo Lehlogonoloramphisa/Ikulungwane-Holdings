@@ -27,6 +27,14 @@ Upload the contents of `dist` into your cPanel `public_html` folder. Upload the 
 
 The build includes a cPanel `.htaccess` file so React routes like `/portfolio`, `/contact`, and `/admin/login` continue to work after refresh.
 
+If `/admin/login`, `/setup`, or `/portfolio` shows a cPanel 404 page, the `.htaccess` rewrite file is missing or not being read. In cPanel File Manager:
+
+1. Open `public_html`.
+2. Click **Settings**.
+3. Enable **Show Hidden Files (dotfiles)**.
+4. Confirm `public_html/.htaccess` exists.
+5. If it does not exist, upload `htaccess.txt`, rename it to `.htaccess`, and keep it in `public_html`.
+
 ## First-Time Installer
 
 After uploading to cPanel, open:
@@ -53,6 +61,16 @@ The setup flow:
 6. Finish Installation
 
 The installer collects database credentials, creates the database tables, creates the first `super_admin`, saves website settings, writes the server-side database config to `public_html/api/config/database.php`, inserts the `installed=true` flag, then redirects to `/admin/login`.
+
+For cPanel/phpMyAdmin, use MySQL/MariaDB. Do not import `database/postgres/schema.sql` into phpMyAdmin. That file is only for PostgreSQL and will fail on MariaDB with syntax errors such as `CREATE EXTENSION IF NOT EXISTS pgcrypto`.
+
+If you need a manual phpMyAdmin import, use:
+
+```text
+database/mysql/schema.sql
+```
+
+If the installer shows `SQLSTATE[HY000] [1045] Access denied`, MySQL rejected the database username or password. In cPanel, copy the exact MySQL username, reset that database user's password if needed, then use **Add User To Database** and grant **All Privileges**.
 
 For security:
 

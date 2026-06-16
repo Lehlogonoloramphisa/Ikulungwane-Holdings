@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Loader2, LogOut, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import { isAdminRole } from "@/lib/roles";
 
 const adminLoginUrl = (location) => {
   const requestedPath = `${location.pathname}${location.search || ""}`;
@@ -28,7 +29,7 @@ export default function AdminGate({ children }) {
     return <Navigate to={adminLoginUrl(location)} replace />;
   }
 
-  if (user?.role !== "admin") {
+  if (!isAdminRole(user?.role)) {
     return (
       <div className="admin-login-shell min-h-screen">
         <section className="admin-access-denied">

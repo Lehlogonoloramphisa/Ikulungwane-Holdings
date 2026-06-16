@@ -4,6 +4,14 @@ import { cmsDefaults } from "@/data/cmsDefaults";
 const CMS_KEY = "ikulungwane_cms_content";
 const LEGACY_DEFAULT_ACCENT = "#ff9800";
 const DEFAULT_ACCENT = "#e11d2e";
+const TYPOGRAPHY_LIMITS = {
+  logo: [18, 24],
+  footerLogo: [22, 30],
+  navigation: [10, 12],
+  heroHeading: [46, 76],
+  sectionHeading: [30, 46],
+  body: [14, 16],
+};
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -40,6 +48,12 @@ const getStorage = () => {
   }
 };
 
+const clampStoredNumber = (value, min, max) => {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return value;
+  return Math.min(max, Math.max(min, number));
+};
+
 export const readCmsOverride = () => {
   const storage = getStorage();
   if (!storage) return {};
@@ -55,6 +69,13 @@ export const readCmsOverride = () => {
       }
       if (branding.accentColor === LEGACY_DEFAULT_ACCENT) {
         branding.accentColor = DEFAULT_ACCENT;
+      }
+      if (isPlainObject(branding.textSizes)) {
+        Object.entries(TYPOGRAPHY_LIMITS).forEach(([key, [min, max]]) => {
+          if (branding.textSizes[key] !== undefined) {
+            branding.textSizes[key] = clampStoredNumber(branding.textSizes[key], min, max);
+          }
+        });
       }
     }
 

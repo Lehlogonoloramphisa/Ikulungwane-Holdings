@@ -73,7 +73,7 @@ const makeWhatsappUrl = (value) => {
   return `https://wa.me/${normalized}`;
 };
 
-function Field({ label, value, onChange, type = "text", multiline = false, help, placeholder, options }) {
+function Field({ label, value, onChange, type = "text", multiline = false, help, placeholder, options, min, max, step }) {
   return (
     <div className="admin-field">
       <Label>{label}</Label>
@@ -95,6 +95,9 @@ function Field({ label, value, onChange, type = "text", multiline = false, help,
           value={value || ""}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
+          min={min}
+          max={max}
+          step={step}
         />
       )}
       {help && <p>{help}</p>}
@@ -661,12 +664,12 @@ export default function SettingsPage() {
                 <Field label="Body font" options={FONT_OPTIONS} value={get("global.branding.bodyFont") || get("global.branding.typography")} onChange={(value) => update("global.branding.bodyFont", value)} />
                 <Field label="Heading font" options={FONT_OPTIONS} value={get("global.branding.headingFont") || get("global.branding.typography")} onChange={(value) => update("global.branding.headingFont", value)} />
                 <Field label="Display font" options={FONT_OPTIONS} value={get("global.branding.displayFont") || get("global.branding.typography")} onChange={(value) => update("global.branding.displayFont", value)} />
-                <Field label="Body text size" type="number" value={get("global.branding.textSizes.body")} onChange={(value) => update("global.branding.textSizes.body", Number(value))} help="Recommended: 15-18 px." />
-                <Field label="Header logo text size" type="number" value={get("global.branding.textSizes.logo")} onChange={(value) => update("global.branding.textSizes.logo", Number(value))} help="Used when no header image logo is uploaded." />
-                <Field label="Footer logo text size" type="number" value={get("global.branding.textSizes.footerLogo")} onChange={(value) => update("global.branding.textSizes.footerLogo", Number(value))} />
-                <Field label="Navigation text size" type="number" value={get("global.branding.textSizes.navigation")} onChange={(value) => update("global.branding.textSizes.navigation", Number(value))} help="Recommended: 10-13 px." />
-                <Field label="Hero heading max size" type="number" value={get("global.branding.textSizes.heroHeading")} onChange={(value) => update("global.branding.textSizes.heroHeading", Number(value))} help="Largest hero headline size in px." />
-                <Field label="Section heading max size" type="number" value={get("global.branding.textSizes.sectionHeading")} onChange={(value) => update("global.branding.textSizes.sectionHeading", Number(value))} help="Largest section heading size in px." />
+                <Field label="Body text size" type="number" min="14" max="16" value={get("global.branding.textSizes.body")} onChange={(value) => update("global.branding.textSizes.body", Number(value))} help="Recommended: 14-16 px for the centered layout." />
+                <Field label="Header logo text size" type="number" min="18" max="24" value={get("global.branding.textSizes.logo")} onChange={(value) => update("global.branding.textSizes.logo", Number(value))} help="Used when no header image logo is uploaded." />
+                <Field label="Footer logo text size" type="number" min="22" max="30" value={get("global.branding.textSizes.footerLogo")} onChange={(value) => update("global.branding.textSizes.footerLogo", Number(value))} help="Recommended: 22-30 px." />
+                <Field label="Navigation text size" type="number" min="10" max="12" value={get("global.branding.textSizes.navigation")} onChange={(value) => update("global.branding.textSizes.navigation", Number(value))} help="Recommended: 10-12 px." />
+                <Field label="Hero heading max size" type="number" min="46" max="76" value={get("global.branding.textSizes.heroHeading")} onChange={(value) => update("global.branding.textSizes.heroHeading", Number(value))} help="Recommended: 64-72 px. The public site caps this at 76 px." />
+                <Field label="Section heading max size" type="number" min="30" max="46" value={get("global.branding.textSizes.sectionHeading")} onChange={(value) => update("global.branding.textSizes.sectionHeading", Number(value))} help="Recommended: 38-42 px. The public site caps this at 46 px." />
               </div>
               <div className="admin-toggle-grid">
                 <ToggleRow label="Preloader" checked={Boolean(get("global.animations.preloader", true))} onChange={(value) => update("global.animations.preloader", value)} />

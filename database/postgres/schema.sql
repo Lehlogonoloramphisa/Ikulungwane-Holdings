@@ -1,6 +1,8 @@
 -- Ikulungwane Holdings SQL database schema
 -- Target database: PostgreSQL 14+.
 -- Suitable hosted providers: Supabase, Neon, Railway, Render, or a VPS Postgres instance.
+-- Do not import this file into cPanel/phpMyAdmin/MySQL/MariaDB.
+-- For cPanel/phpMyAdmin, use database/mysql/schema.sql instead.
 
 BEGIN;
 

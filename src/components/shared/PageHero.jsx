@@ -7,7 +7,7 @@ export default function PageHero({ title, subtitle, image, height = "min-h-[46sv
       {image ? (
         <img src={image} alt={title} className="absolute inset-0 h-full w-full object-cover opacity-30" />
       ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_20%,rgba(255,152,0,0.12),transparent_32%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_20%,rgba(225,29,46,0.12),transparent_32%)]" />
       )}
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.96),rgba(0,0,0,0.72),rgba(0,0,0,0.9))]" />
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6">

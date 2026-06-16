@@ -135,9 +135,42 @@ function test_database($database) {
         setup_json(422, ['error' => 'Database password is required.']);
     }
 
-    $pdo = pdo_from_config($config);
-    $pdo->query('SELECT 1');
-    return $pdo;
+    try {
+        $pdo = pdo_from_config($config);
+        $pdo->query('SELECT 1');
+        return $pdo;
+    } catch (Throwable $error) {
+        setup_json(422, [
+            'error' => database_connection_error_message($error, $config),
+            'code' => 'database_connection_failed',
+        ]);
+    }
+}
+
+function database_connection_error_message(Throwable $error, $config) {
+    $message = $error->getMessage();
+    $host = $config['host'] ?? 'localhost';
+    $port = $config['port'] ?? 3306;
+    $name = $config['name'] ?? '';
+    $username = $config['username'] ?? '';
+
+    if (strpos($message, '[1045]') !== false || strpos($message, 'Access denied for user') !== false) {
+        return "MySQL rejected the database username or password. In cPanel, open MySQL Databases and check these exact values: database user '{$username}', database '{$name}', host '{$host}', port '{$port}'. Make sure the username is copied exactly as cPanel shows it, including lowercase/uppercase letters and the account prefix. Reset the database user's password if unsure, then use Add User To Database and give the user All Privileges.";
+    }
+
+    if (strpos($message, '[1049]') !== false || stripos($message, 'Unknown database') !== false) {
+        return "The database '{$name}' does not exist or the name is not typed exactly as cPanel created it. In cPanel, copy the full database name including the account prefix.";
+    }
+
+    if (strpos($message, '[1044]') !== false) {
+        return "The database user '{$username}' exists, but it does not have permission to use database '{$name}'. In cPanel, use Add User To Database and give the user All Privileges.";
+    }
+
+    if (strpos($message, '[2002]') !== false || stripos($message, 'Connection refused') !== false) {
+        return "The installer could not reach MySQL at {$host}:{$port}. For most cPanel accounts, use host 'localhost' and port '3306'. If that fails, copy the MySQL host from your hosting provider.";
+    }
+
+    return "Database connection failed: " . $message;
 }
 
 function create_tables(PDO $pdo) {

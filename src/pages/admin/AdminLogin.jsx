@@ -19,6 +19,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { applyBrandingVariables } from "@/lib/branding";
 import { useCms } from "@/lib/cms";
 import { getSetupStatus } from "@/lib/setupApi";
+import { isAdminRole } from "@/lib/roles";
 
 const safeAdminRedirect = (value) => {
   const isAdminPath = value === "/admin" || value?.startsWith("/admin/") || value?.startsWith("/admin?");
@@ -89,7 +90,7 @@ export default function AdminLogin() {
   }, [navigate]);
 
   useEffect(() => {
-    if (authChecked && isAuthenticated && user?.role === "admin") {
+    if (authChecked && isAuthenticated && isAdminRole(user?.role)) {
       navigate(redirectTo, { replace: true });
     }
   }, [authChecked, isAuthenticated, navigate, redirectTo, user?.role]);
@@ -104,7 +105,7 @@ export default function AdminLogin() {
         ? await localApi.auth.createAdminAccount({ email, password, full_name: fullName })
         : await localApi.auth.loginViaEmailPassword(email, password);
 
-      if (adminUser.role !== "admin") {
+      if (!isAdminRole(adminUser.role)) {
         localApi.auth.logout();
         throw new Error("This account is not an admin account.");
       }

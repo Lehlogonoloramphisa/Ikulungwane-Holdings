@@ -12,6 +12,12 @@ const FONT_STACKS = {
 
 const fontStack = (name, fallback = FONT_STACKS.Outfit) => FONT_STACKS[name] || fallback;
 
+const clampNumber = (value, min, max, fallback) => {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, number));
+};
+
 const setCssVar = (name, value) => {
   if (typeof document === "undefined" || value === undefined || value === null || value === "") return;
   document.documentElement.style.setProperty(name, value);
@@ -68,10 +74,10 @@ export const applyBrandingVariables = (branding = {}) => {
   setCssVar("--font-body", fontStack(branding.bodyFont || branding.typography));
   setCssVar("--font-heading", fontStack(branding.headingFont || branding.typography));
   setCssVar("--font-display", fontStack(branding.displayFont || branding.typography));
-  setCssVar("--site-logo-text-size", `${Number(branding.textSizes?.logo) || 24}px`);
-  setCssVar("--site-footer-logo-text-size", `${Number(branding.textSizes?.footerLogo) || 30}px`);
-  setCssVar("--site-nav-text-size", `${Number(branding.textSizes?.navigation) || 11}px`);
-  setCssVar("--site-hero-heading-size", `${Number(branding.textSizes?.heroHeading) || 88}px`);
-  setCssVar("--site-section-heading-size", `${Number(branding.textSizes?.sectionHeading) || 52}px`);
-  setCssVar("--site-body-text-size", `${Number(branding.textSizes?.body) || 16}px`);
+  setCssVar("--site-logo-text-size", `${clampNumber(branding.textSizes?.logo, 18, 24, 22)}px`);
+  setCssVar("--site-footer-logo-text-size", `${clampNumber(branding.textSizes?.footerLogo, 22, 30, 28)}px`);
+  setCssVar("--site-nav-text-size", `${clampNumber(branding.textSizes?.navigation, 10, 12, 11)}px`);
+  setCssVar("--site-hero-heading-size", `${clampNumber(branding.textSizes?.heroHeading, 46, 76, 72)}px`);
+  setCssVar("--site-section-heading-size", `${clampNumber(branding.textSizes?.sectionHeading, 30, 46, 42)}px`);
+  setCssVar("--site-body-text-size", `${clampNumber(branding.textSizes?.body, 14, 16, 15)}px`);
 };

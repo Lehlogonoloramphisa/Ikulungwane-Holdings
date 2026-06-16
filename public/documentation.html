@@ -728,6 +728,11 @@
 
       <section id="database">
         <h3>10. Database Tables</h3>
+        <div class="callout warning">
+          <strong>Important for cPanel/phpMyAdmin:</strong> use <code>database/mysql/schema.sql</code>.
+          Do not import <code>database/postgres/schema.sql</code> into MariaDB/MySQL. PostgreSQL files contain syntax such as
+          <code>CREATE EXTENSION IF NOT EXISTS pgcrypto;</code>, which causes MySQL error <code>#1064</code>.
+        </div>
         <p>The installer creates the required tables automatically. The most important table is the install flag table:</p>
         <pre><code>CREATE TABLE system_settings (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -789,10 +794,12 @@ VALUES ('installed', 'true');</code></pre>
           <div class="card">
             <h4>Database connection fails</h4>
             <p>Check database name, username, password, host, and port. On cPanel the database and username often start with your cPanel username.</p>
+            <p>If you see <code>SQLSTATE[HY000] [1045] Access denied</code>, MySQL rejected the username or password. Copy the exact MySQL username from cPanel, reset the database user's password if needed, then use <strong>Add User To Database</strong> and choose <strong>All Privileges</strong>.</p>
           </div>
           <div class="card">
             <h4>Pages 404 after refresh</h4>
             <p>Make sure <code>.htaccess</code> was uploaded to <code>public_html</code>. Some file managers hide dotfiles by default.</p>
+            <p>If <code>/admin/login</code>, <code>/setup</code>, or <code>/portfolio</code> shows a cPanel 404 page, upload <code>htaccess.txt</code> to <code>public_html</code>, rename it to <code>.htaccess</code>, and enable <strong>Show Hidden Files (dotfiles)</strong> in cPanel File Manager.</p>
           </div>
           <div class="card">
             <h4>Email test fails</h4>

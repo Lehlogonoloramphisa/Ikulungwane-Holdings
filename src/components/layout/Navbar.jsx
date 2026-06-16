@@ -156,7 +156,7 @@ export default function Navbar() {
                   {navigation.menuDescription}
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col">
-                  <Link to={navigation.buttonLink} className="ashley-button ashley-button-primary">
+                  <Link to={navigation.buttonLink} className="ashley-button ashley-button-primary site-menu-cta">
                     {navigation.buttonText}
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
