@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 export default function AboutPreview() {
   const cms = useCms();
   const section = cms.pages.home.aboutPreview;
   const principles = orderedEnabled(section.featureCards);
   const stats = orderedEnabled(section.statistics);
+  const mainImage = normalizeMediaUrl(section.mainImage);
 
   if (!section.show) return null;
 
@@ -58,9 +60,9 @@ export default function AboutPreview() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
         >
-          {section.mainImage && (
+          {mainImage && (
             <div className="studio-about-image is-main">
-              <img src={section.mainImage} alt={section.title} />
+              <img src={mainImage} alt={section.title} />
             </div>
           )}
           <div className="studio-about-stats">

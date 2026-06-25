@@ -15,6 +15,7 @@ import {
 import { localApi } from "@/api/localClient";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const formatDate = (value, fallback = "Date TBD") => {
   if (!value) return fallback;
@@ -249,8 +250,8 @@ export default function Dashboard() {
             latestProjects.map((project) => (
               <Link key={project.id} to="/admin/portfolio" className="admin-project-preview">
                 <div>
-                  {project.cover_image ? (
-                    <img src={project.cover_image} alt={project.title} />
+                  {normalizeMediaUrl(project.cover_image) ? (
+                    <img src={normalizeMediaUrl(project.cover_image)} alt={project.title} />
                   ) : (
                     <Image className="h-7 w-7 text-white/25" />
                   )}

@@ -8,7 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminMediaField from "@/components/admin/AdminMediaField";
 import { slugify } from "@/lib/adminHelpers";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const CATEGORIES = ["weddings", "events", "corporate", "graduations", "product", "lifestyle", "videography"];
 
@@ -46,31 +49,26 @@ export default function PortfolioManagement() {
   const handleNew = () => { setEditing({ ...emptyProject }); setDialogOpen(true); };
   const handleEdit = (project) => { setEditing({ ...project }); setDialogOpen(true); };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const { file_url } = await localApi.integrations.Core.UploadFile({ file });
-    setEditing((prev) => ({ ...prev, cover_image: file_url }));
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-white">Portfolio</h1>
-          <p className="text-white/40 text-sm font-body mt-1">{projects.length} projects</p>
-        </div>
-        <button onClick={handleNew} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-obsidian text-sm font-body font-semibold uppercase tracking-wider">
+    <div className="admin-list-page">
+      <AdminPageHeader
+        eyebrow="Content"
+        title="Portfolio"
+        description="Manage the work shown across the portfolio and home selected work sections."
+        count={`${projects.length} projects`}
+        actions={(
+          <button onClick={handleNew} className="admin-primary-action">
           <Plus className="w-4 h-4" /> Add Project
-        </button>
-      </div>
+          </button>
+        )}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="admin-collection-grid">
         {projects.map((project) => (
-          <div key={project.id} className="border border-white/5 bg-white/[0.02] overflow-hidden group">
+          <article key={project.id} className="admin-content-card">
             <div className="aspect-video relative">
-              {project.cover_image ? (
-                <img src={project.cover_image} alt={project.title} className="w-full h-full object-cover" />
+              {normalizeMediaUrl(project.cover_image) ? (
+                <img src={normalizeMediaUrl(project.cover_image)} alt={project.title} className="w-full h-full object-contain bg-black/35" />
               ) : (
                 <div className="w-full h-full bg-white/5 flex items-center justify-center">
                   <Image className="w-8 h-8 text-white/20" />
@@ -84,19 +82,19 @@ export default function PortfolioManagement() {
             <div className="p-4">
               <p className="text-primary text-[10px] uppercase tracking-wider font-body">{project.category}</p>
               <h3 className="text-white font-body font-medium mt-1">{project.title}</h3>
-              <div className="flex gap-2 mt-3">
-                <button onClick={() => handleEdit(project)} className="flex items-center gap-1 px-3 py-1.5 border border-white/10 text-white/60 text-xs hover:border-primary hover:text-primary transition-all">
+              <div className="admin-record-actions">
+                <button onClick={() => handleEdit(project)}>
                   <Edit className="w-3 h-3" /> Edit
                 </button>
-                <button onClick={() => { if (confirm("Delete this project?")) deleteMutation.mutate(project.id); }} className="flex items-center gap-1 px-3 py-1.5 border border-white/10 text-red-400/60 text-xs hover:border-red-400 hover:text-red-400 transition-all">
+                <button onClick={() => { if (confirm("Delete this project?")) deleteMutation.mutate(project.id); }} className="is-danger">
                   <Trash2 className="w-3 h-3" /> Delete
                 </button>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
-      {projects.length === 0 && <p className="py-16 text-center text-white/30 text-sm font-body">No portfolio projects yet</p>}
+      {projects.length === 0 && <p className="admin-empty-copy">No portfolio projects yet</p>}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-[#111] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -106,7 +104,7 @@ export default function PortfolioManagement() {
             </DialogTitle>
           </DialogHeader>
           {editing && (
-            <div className="space-y-4 mt-4">
+            <div className="admin-dialog-form">
               <Input placeholder="Project Title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Input placeholder="URL Slug" value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v })}>
@@ -117,11 +115,13 @@ export default function PortfolioManagement() {
               </Select>
               <Textarea placeholder="Description" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className="bg-white/5 border-white/10 text-white min-h-[100px]" />
               
-              <div>
-                <Label className="text-white/60 text-sm mb-2 block">Cover Image</Label>
-                {editing.cover_image && <img src={editing.cover_image} alt="" className="w-full h-40 object-cover mb-2" />}
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="text-white/50 text-sm" />
-              </div>
+              <AdminMediaField
+                label="Cover Image"
+                value={editing.cover_image}
+                recommendedSize="1600 x 1000 px or larger"
+                help="Shown in portfolio previews, case studies, and selected work."
+                onChange={(fileUrl) => setEditing({ ...editing, cover_image: fileUrl, images: fileUrl ? [fileUrl] : [] })}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <Input placeholder="Client Name" value={editing.client_name} onChange={(e) => setEditing({ ...editing, client_name: e.target.value })} className="bg-white/5 border-white/10 text-white" />

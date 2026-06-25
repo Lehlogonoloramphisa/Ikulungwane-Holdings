@@ -1,11 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { normalizeMediaUrl } from "@/lib/media";
 
 export default function PageHero({ title, subtitle, image, height = "min-h-[46svh]" }) {
+  const heroImage = normalizeMediaUrl(image);
+
   return (
     <section className={`ashley-section relative ${height} flex items-end overflow-hidden bg-black pb-14 pt-32`}>
-      {image ? (
-        <img src={image} alt={title} className="absolute inset-0 h-full w-full object-cover opacity-30" />
+      {heroImage ? (
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover opacity-30" />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_20%,rgba(225,29,46,0.12),transparent_32%)]" />
       )}

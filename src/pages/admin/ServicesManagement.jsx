@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminMediaField from "@/components/admin/AdminMediaField";
 import { linesToList, listToLines, slugify } from "@/lib/adminHelpers";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const empty = { title: "", slug: "", description: "", long_description: "", cover_image: "", packages: [], faqs: [], published: true, order: 0 };
 
@@ -35,13 +38,6 @@ export default function ServicesManagement() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-services"] }),
   });
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const { file_url } = await localApi.integrations.Core.UploadFile({ file });
-    setEditing((prev) => ({ ...prev, cover_image: file_url }));
-  };
-
   const addPackage = () => {
     setEditing((prev) => ({ ...prev, packages: [...(prev.packages || []), { name: "", price: "", features: [""] }] }));
   };
@@ -59,47 +55,54 @@ export default function ServicesManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-white">Services</h1>
-        <button onClick={() => { setEditing({ ...empty }); setDialogOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-obsidian text-sm font-body font-semibold uppercase tracking-wider">
+    <div className="admin-list-page">
+      <AdminPageHeader
+        eyebrow="Content"
+        title="Services"
+        description="Edit service pages, packages, pricing notes, and the services shown on the website."
+        count={`${services.length} services`}
+        actions={(
+          <button onClick={() => { setEditing({ ...empty }); setDialogOpen(true); }} className="admin-primary-action">
           <Plus className="w-4 h-4" /> Add Service
-        </button>
-      </div>
+          </button>
+        )}
+      />
 
-      <div className="space-y-3">
+      <div className="admin-list-stack">
         {services.map((s) => (
-          <div key={s.id} className="p-5 border border-white/5 bg-white/[0.02] flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              {s.cover_image && <img src={s.cover_image} alt="" className="w-16 h-16 object-cover flex-shrink-0" />}
-              <div>
+          <article key={s.id} className="admin-list-card">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              {normalizeMediaUrl(s.cover_image) && <img src={normalizeMediaUrl(s.cover_image)} alt="" className="w-16 h-16 object-contain bg-black/35 flex-shrink-0" />}
+              <div className="min-w-0">
                 <h3 className="text-white font-body font-medium">{s.title}</h3>
                 <p className="text-white/30 text-xs font-body">{s.packages?.length || 0} packages</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => { setEditing({ ...s }); setDialogOpen(true); }} className="p-2 text-white/40 hover:text-primary transition-colors"><Edit className="w-4 h-4" /></button>
-              <button onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(s.id); }} className="p-2 text-white/40 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+            <div className="admin-icon-actions">
+              <button onClick={() => { setEditing({ ...s }); setDialogOpen(true); }} aria-label={`Edit ${s.title}`}><Edit className="w-4 h-4" /></button>
+              <button onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(s.id); }} className="is-danger" aria-label={`Delete ${s.title}`}><Trash2 className="w-4 h-4" /></button>
             </div>
-          </div>
+          </article>
         ))}
-        {services.length === 0 && <p className="py-16 text-center text-white/30 text-sm font-body">No services yet. Default services will show on the website.</p>}
+        {services.length === 0 && <p className="admin-empty-copy">No services yet. Default services will show on the website.</p>}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-[#111] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="font-display text-xl text-white">{editing?.id ? "Edit" : "New"} Service</DialogTitle></DialogHeader>
           {editing && (
-            <div className="space-y-4 mt-4">
+            <div className="admin-dialog-form">
               <Input placeholder="Service Title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Input placeholder="URL Slug" value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Textarea placeholder="Short Description" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Textarea placeholder="Long Description" value={editing.long_description} onChange={(e) => setEditing({ ...editing, long_description: e.target.value })} className="bg-white/5 border-white/10 text-white min-h-[120px]" />
-              <div>
-                <Label className="text-white/60 text-sm mb-2 block">Cover Image</Label>
-                {editing.cover_image && <img src={editing.cover_image} alt="" className="w-full h-32 object-cover mb-2" />}
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="text-white/50 text-sm" />
-              </div>
+              <AdminMediaField
+                label="Cover Image"
+                value={editing.cover_image}
+                recommendedSize="1600 x 1000 px or larger"
+                help="Used on services pages and home service previews."
+                onChange={(fileUrl) => setEditing({ ...editing, cover_image: fileUrl })}
+              />
 
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -107,7 +110,7 @@ export default function ServicesManagement() {
                   <button onClick={addPackage} className="text-primary text-xs uppercase tracking-wider font-body hover:underline">+ Add Package</button>
                 </div>
                 {editing.packages?.map((pkg, i) => (
-                  <div key={i} className="p-4 border border-white/5 mb-3 space-y-3">
+                  <div key={i} className="admin-nested-editor">
                     <div className="flex items-center justify-between">
                       <span className="text-white/40 text-xs">Package {i + 1}</span>
                       <button onClick={() => removePackage(i)} className="text-red-400/60 text-xs hover:text-red-400"><Trash2 className="w-3 h-3" /></button>

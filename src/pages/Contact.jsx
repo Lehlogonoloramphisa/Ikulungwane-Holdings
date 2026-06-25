@@ -11,6 +11,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", service_interested: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const cms = useCms();
   const page = cms.pages.contact;
   const contact = cms.global.contact;
@@ -27,11 +28,17 @@ export default function Contact() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    const message = { ...form, status: "new" };
-    await localApi.entities.ContactMessage.create(message);
-    await sendSiteEmail({ type: "contact", payload: message, cms });
-    setSubmitted(true);
-    setLoading(false);
+    setError("");
+    try {
+      const message = { ...form, status: "new" };
+      await localApi.entities.ContactMessage.create(message);
+      await sendSiteEmail({ type: "contact", payload: message, cms });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Your message could not be sent. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -132,6 +139,7 @@ export default function Contact() {
                   required={field.required}
                 />
               ))}
+              {error && <p className="form-error-message">{error}</p>}
               <button type="submit" disabled={loading}>
                 {loading ? "Sending..." : "Send Message"}
                 <Send />

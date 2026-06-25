@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fallbackBlogPosts } from "@/data/fallbackContent";
 import { useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const CATEGORIES = [
   { key: "all", label: "All" },
@@ -41,6 +42,7 @@ export default function Blog() {
 
   const featured = filtered[0] || displayPosts[0];
   const rest = filtered.slice(1);
+  const featuredImage = normalizeMediaUrl(featured?.featured_image);
 
   return (
     <main className="interior-page journal-page">
@@ -52,9 +54,9 @@ export default function Blog() {
             {page.hero.description}
           </span>
         </div>
-        {featured?.featured_image && (
+        {featuredImage && (
           <Link to={`/blog/${featured.slug || featured.id}`} className="journal-hero-feature">
-            <img src={featured.featured_image} alt={featured.title} />
+            <img src={featuredImage} alt={featured.title} />
             <div>
               <span>{featured.category?.replace(/_/g, " ")}</span>
               <h2>{featured.title}</h2>
@@ -99,7 +101,7 @@ export default function Blog() {
                 <Link to={`/blog/${post.slug || post.id}`}>
                   <span>{String(index + 2).padStart(2, "0")}</span>
                   <div className="journal-post-image">
-                    {post.featured_image && <img src={post.featured_image} alt={post.title} />}
+                    {post.featured_image && <img src={normalizeMediaUrl(post.featured_image)} alt={post.title} />}
                   </div>
                   <div>
                     <p>{post.category?.replace(/_/g, " ")} / {formatDate(post.created_date)}</p>

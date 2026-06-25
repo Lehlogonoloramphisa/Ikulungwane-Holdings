@@ -5,6 +5,7 @@ import { localApi } from "@/api/localClient";
 import { motion } from "framer-motion";
 import { ArrowRight, Camera, Globe, Lightbulb, Megaphone, Palette, Video } from "lucide-react";
 import { useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const ICONS = { Camera, Video, Palette, Globe, Megaphone, Lightbulb };
 
@@ -73,6 +74,7 @@ export default function ServicesPreview() {
   }, [services, section.serviceCount]);
 
   const current = display[active] || display[0];
+  const currentImage = normalizeMediaUrl(current?.image);
 
   if (!section.show) return null;
 
@@ -120,7 +122,7 @@ export default function ServicesPreview() {
           >
             {current && (
               <>
-                <img src={current.image} alt={current.title} />
+                {currentImage && <img src={currentImage} alt={current.title} />}
                 <div>
                   <span>{current.category || "Creative Service"}</span>
                   <h3>{current.title}</h3>

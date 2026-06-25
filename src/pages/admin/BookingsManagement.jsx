@@ -4,6 +4,7 @@ import { localApi } from "@/api/localClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { csvEscape } from "@/lib/adminHelpers";
 
 const STATUSES = ["new", "pending_review", "quotation_sent", "confirmed", "completed", "cancelled"];
@@ -56,33 +57,35 @@ export default function BookingsManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-white">Bookings</h1>
-          <p className="text-white/40 text-sm font-body mt-1">{filtered.length} bookings</p>
-        </div>
-        <button onClick={exportCSV} className="flex items-center gap-2 px-5 py-2.5 border border-white/10 text-white/60 text-sm font-body hover:border-primary hover:text-primary transition-all">
+    <div className="admin-list-page">
+      <AdminPageHeader
+        eyebrow="Clients"
+        title="Bookings"
+        description="Review session requests, update booking status, and export the current list."
+        count={`${filtered.length} bookings`}
+        actions={(
+          <button onClick={exportCSV} className="admin-secondary-action">
           <Download className="w-4 h-4" /> Export CSV
-        </button>
-      </div>
+          </button>
+        )}
+      />
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="admin-toolbar">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <input type="text" placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 text-white text-sm font-body placeholder:text-white/30 focus:outline-none focus:border-primary/50" />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setFilter("all")} className={`px-3 py-2 text-xs uppercase tracking-wider font-body border transition-all ${filter === "all" ? "border-primary text-primary" : "border-white/10 text-white/40"}`}>All</button>
+        <div className="admin-filter-group">
+          <button onClick={() => setFilter("all")} className={`admin-filter-button ${filter === "all" ? "is-active" : ""}`}>All</button>
           {STATUSES.map((s) => (
-            <button key={s} onClick={() => setFilter(s)} className={`px-3 py-2 text-xs uppercase tracking-wider font-body border transition-all ${filter === s ? "border-primary text-primary" : "border-white/10 text-white/40"}`}>
+            <button key={s} onClick={() => setFilter(s)} className={`admin-filter-button ${filter === s ? "is-active" : ""}`}>
               {s.replace(/_/g, " ")}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="border border-white/5 overflow-x-auto">
+      <div className="admin-table-wrap">
         <table className="w-full text-sm font-body">
           <thead>
             <tr className="border-b border-white/5 text-white/40">
@@ -118,7 +121,7 @@ export default function BookingsManagement() {
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && <p className="p-8 text-center text-white/30 text-sm">No bookings found</p>}
+        {filtered.length === 0 && <p className="admin-empty-copy">No bookings found</p>}
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
@@ -127,7 +130,7 @@ export default function BookingsManagement() {
             <DialogTitle className="font-display text-xl text-white">Booking Details</DialogTitle>
           </DialogHeader>
           {selected && (
-            <div className="space-y-4 mt-4">
+            <div className="admin-dialog-form">
               <div className="grid grid-cols-2 gap-4 text-sm font-body">
                 <div><p className="text-white/40 text-xs mb-1">Reference</p><p className="text-primary">{selected.reference}</p></div>
                 <div><p className="text-white/40 text-xs mb-1">Name</p><p>{selected.full_name}</p></div>

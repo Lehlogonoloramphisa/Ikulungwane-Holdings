@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Menu, MessageCircle, X } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const HEADER_ORDER = ["/", "/portfolio", "/about", "/services", "/blog", "/contact"];
 
@@ -26,6 +27,7 @@ export default function Navbar() {
   const navigation = cms.global.navigation;
   const contact = cms.global.contact;
   const navLinks = orderHeaderLinks(navigation.menuItems);
+  const logoImage = normalizeMediaUrl(site.logoImage);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -55,8 +57,8 @@ export default function Navbar() {
       >
         <nav className="site-header-nav mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link to="/" className="site-brand group" aria-label={`${site.companyName} home`}>
-            {site.logoImage ? (
-              <img src={site.logoImage} alt={site.logoAlt || site.companyName} className="site-brand-logo" />
+            {logoImage ? (
+              <img src={logoImage} alt={site.logoAlt || site.companyName} className="site-brand-logo" />
             ) : (
               <>
                 <span className="site-brand-text">

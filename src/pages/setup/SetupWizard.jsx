@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   Image as ImageIcon,
+  Link2,
   Loader2,
   Lock,
   Mail,
@@ -28,6 +29,7 @@ import {
   installSystem,
   testDatabaseConnection,
 } from "@/lib/setupApi";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const STEP_ROUTES = {
   welcome: "/setup",
@@ -131,6 +133,7 @@ export default function SetupWizard({ installStatus }) {
   const [admin, setAdmin] = useState(defaultAdmin);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [site, setSite] = useState(defaultSite);
+  const [logoUrl, setLogoUrl] = useState("");
   const [installing, setInstalling] = useState(false);
   const [installError, setInstallError] = useState("");
 
@@ -140,6 +143,7 @@ export default function SetupWizard({ installStatus }) {
   const requirementsPassed = requirements?.items?.every((item) => item.ok || !item.required);
   const adminValid = admin.fullName.trim() && admin.email.trim() && admin.password.length >= 8 && admin.password === admin.confirmPassword;
   const siteValid = site.siteName.trim() && site.email.trim();
+  const previewLogo = normalizeMediaUrl(site.logo);
 
   useEffect(() => {
     let mounted = true;
@@ -186,6 +190,13 @@ export default function SetupWizard({ installStatus }) {
     const reader = new FileReader();
     reader.onload = () => updateSite("logo", reader.result || "");
     reader.readAsDataURL(file);
+  };
+
+  const handleLogoUrl = () => {
+    const nextLogo = normalizeMediaUrl(logoUrl);
+    if (!nextLogo) return;
+    updateSite("logo", nextLogo);
+    setLogoUrl("");
   };
 
   const handleDatabaseTest = async () => {
@@ -405,13 +416,24 @@ export default function SetupWizard({ installStatus }) {
             <div className="setup-form-section">
               <div className="setup-logo-row">
                 <div className="setup-logo-preview">
-                  {site.logo ? <img src={site.logo} alt="Uploaded logo preview" /> : <ImageIcon />}
+                  {previewLogo ? <img src={previewLogo} alt="Uploaded logo preview" /> : <ImageIcon />}
                 </div>
                 <label className="setup-upload-button">
                   <Upload className="h-4 w-4" />
                   Upload Logo
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => handleLogoUpload(event.target.files?.[0])} />
                 </label>
+              </div>
+              <div className="setup-logo-link-row">
+                <Input
+                  value={logoUrl}
+                  onChange={(event) => setLogoUrl(event.target.value)}
+                  placeholder="Paste logo URL or Google Drive share link"
+                />
+                <button type="button" onClick={handleLogoUrl}>
+                  <Link2 className="h-4 w-4" />
+                  Use Link
+                </button>
               </div>
 
               <div className="setup-form-grid">

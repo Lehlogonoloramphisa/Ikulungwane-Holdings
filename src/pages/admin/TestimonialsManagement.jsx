@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const empty = { client_name: "", review: "", rating: 5, service_type: "", featured: false, published: true };
 
@@ -32,17 +33,22 @@ export default function TestimonialsManagement() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-white">Testimonials</h1>
-        <button onClick={() => { setEditing({ ...empty }); setDialogOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-obsidian text-sm font-body font-semibold uppercase tracking-wider">
+    <div className="admin-list-page">
+      <AdminPageHeader
+        eyebrow="Content"
+        title="Testimonials"
+        description="Control client reviews, ratings, and featured testimonial placement."
+        count={`${testimonials.length} testimonials`}
+        actions={(
+          <button onClick={() => { setEditing({ ...empty }); setDialogOpen(true); }} className="admin-primary-action">
           <Plus className="w-4 h-4" /> Add
-        </button>
-      </div>
+          </button>
+        )}
+      />
 
-      <div className="space-y-3">
+      <div className="admin-list-stack">
         {testimonials.map((t) => (
-          <div key={t.id} className="p-5 border border-white/5 bg-white/[0.02] flex items-start justify-between gap-4">
+          <article key={t.id} className="admin-list-card is-top-aligned">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <p className="text-white font-body font-medium">{t.client_name}</p>
@@ -54,20 +60,20 @@ export default function TestimonialsManagement() {
               <p className="text-white/50 text-sm font-body leading-relaxed">"{t.review}"</p>
               {t.service_type && <p className="text-white/30 text-xs uppercase tracking-wider font-body mt-2">{t.service_type}</p>}
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => { setEditing({ ...t }); setDialogOpen(true); }} className="p-2 text-white/40 hover:text-primary transition-colors"><Edit className="w-4 h-4" /></button>
-              <button onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(t.id); }} className="p-2 text-white/40 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+            <div className="admin-icon-actions">
+              <button onClick={() => { setEditing({ ...t }); setDialogOpen(true); }} aria-label={`Edit ${t.client_name}`}><Edit className="w-4 h-4" /></button>
+              <button onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(t.id); }} className="is-danger" aria-label={`Delete ${t.client_name}`}><Trash2 className="w-4 h-4" /></button>
             </div>
-          </div>
+          </article>
         ))}
-        {testimonials.length === 0 && <p className="py-16 text-center text-white/30 text-sm font-body">No testimonials yet</p>}
+        {testimonials.length === 0 && <p className="admin-empty-copy">No testimonials yet</p>}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-[#111] border-white/10 text-white max-w-lg">
           <DialogHeader><DialogTitle className="font-display text-xl text-white">{editing?.id ? "Edit" : "New"} Testimonial</DialogTitle></DialogHeader>
           {editing && (
-            <div className="space-y-4 mt-4">
+            <div className="admin-dialog-form">
               <Input placeholder="Client Name" value={editing.client_name} onChange={(e) => setEditing({ ...editing, client_name: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Input placeholder="Service Type" value={editing.service_type} onChange={(e) => setEditing({ ...editing, service_type: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <div>

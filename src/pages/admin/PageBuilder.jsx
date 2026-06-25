@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   Layers,
+  Link2,
   Monitor,
   Plus,
   RotateCcw,
@@ -20,6 +21,7 @@ import {
 import { cmsDefaults } from "@/data/cmsDefaults";
 import { deepMerge, getValueByPath, resetCmsContent, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
 import { localApi } from "@/api/localClient";
+import { normalizeMediaUrl } from "@/lib/media";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -335,7 +337,7 @@ const emptyValueFor = (sample) => {
 };
 
 function InlineEdit({ value, onChange, role = "body", placeholder }) {
-  const Tag = role === "button" || role === "kicker" ? "input" : "textarea";
+  const Tag = ["button", "kicker", "list-title"].includes(role) ? "input" : "textarea";
   const commonProps = {
     value: value || "",
     onChange: (event) => onChange(event.target.value),
@@ -348,17 +350,31 @@ function InlineEdit({ value, onChange, role = "body", placeholder }) {
 
 function Field({ label, fieldKey, value, path, onChange }) {
   const [uploading, setUploading] = useState(false);
+  const [externalUrl, setExternalUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const handleUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadError("");
     try {
       const result = await localApi.integrations.Core.UploadFile({ file });
       onChange(path, result.file_url || "");
+    } catch (error) {
+      setUploadError(error.message || "Upload failed.");
     } finally {
       setUploading(false);
+      event.target.value = "";
     }
+  };
+
+  const handleUseUrl = () => {
+    const url = normalizeMediaUrl(externalUrl);
+    if (!url) return;
+    onChange(path, url);
+    setExternalUrl("");
+    setUploadError("");
   };
 
   if (typeof value === "boolean") {
@@ -398,6 +414,20 @@ function Field({ label, fieldKey, value, path, onChange }) {
       ) : (
         <Input value={value || ""} onChange={(event) => onChange(path, event.target.value)} />
       )}
+      {looksLikeMediaField(fieldKey) && (
+        <div className="builder-drive-row">
+          <Input
+            value={externalUrl}
+            onChange={(event) => setExternalUrl(event.target.value)}
+            placeholder="Paste image URL or Google Drive share link"
+          />
+          <button type="button" onClick={handleUseUrl}>
+            <Link2 className="h-3 w-3" />
+            Use Link
+          </button>
+        </div>
+      )}
+      {uploadError && <p className="admin-media-error">{uploadError}</p>}
     </div>
   );
 }
@@ -496,9 +526,10 @@ function ObjectEditor({ value, path, onChange }) {
 }
 
 function ImagePreview({ src, label }) {
+  const imageUrl = normalizeMediaUrl(src);
   return (
     <div className="builder-image-preview">
-      {src ? <img src={src} alt="" /> : <div><Upload className="h-5 w-5" /> Add {label}</div>}
+      {imageUrl ? <img src={imageUrl} alt="" /> : <div><Upload className="h-5 w-5" /> Add {label}</div>}
     </div>
   );
 }
@@ -555,14 +586,14 @@ function ListPreview({ list, content, onChange }) {
             <article key={index}>
               {!isPrimitive && list.metaKey && <span>{item[list.metaKey]}</span>}
               <InlineEdit
-                role="button"
+                role={isPrimitive ? "list-body" : "list-title"}
                 value={isPrimitive ? item : item[list.titleKey]}
                 onChange={(nextValue) => onChange(`${list.path}.${index}${isPrimitive ? "" : `.${list.titleKey}`}`, nextValue)}
                 placeholder="Item title"
               />
               {!isPrimitive && list.textKey && (
                 <InlineEdit
-                  role="body"
+                  role="list-body"
                   value={item[list.textKey]}
                   onChange={(nextValue) => onChange(`${list.path}.${index}.${list.textKey}`, nextValue)}
                   placeholder="Item description"
@@ -581,7 +612,7 @@ function SectionPreview({ config, content, isActive, onSelect, onChange, activeS
   const image = config.imagePath ? getValueByPath(content, config.imagePath) : "";
   const slides = Array.isArray(value.slides) ? value.slides : [];
   const activeSlide = slides[activeSlideIndex] || slides[0];
-  const heroImage = config.kind === "hero" && activeSlide?.image ? activeSlide.image : image;
+  const heroImage = normalizeMediaUrl(config.kind === "hero" && activeSlide?.image ? activeSlide.image : image);
   const isHidden = value.show === false;
 
   return (
@@ -629,16 +660,21 @@ function Inspector({ section, content, onChange, activeSlideIndex, onSlideSelect
   const slides = Array.isArray(value.slides) ? value.slides : [];
   const activeSlide = slides[activeSlideIndex] || slides[0];
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const uploadImage = async (event) => {
     const file = event.target.files?.[0];
     if (!file || !section.imagePath) return;
     setUploading(true);
+    setUploadError("");
     try {
       const result = await localApi.integrations.Core.UploadFile({ file });
       onChange(section.imagePath, result.file_url || "");
+    } catch (error) {
+      setUploadError(error.message || "Upload failed.");
     } finally {
       setUploading(false);
+      event.target.value = "";
     }
   };
 
@@ -780,10 +816,11 @@ function Inspector({ section, content, onChange, activeSlideIndex, onSlideSelect
             {uploading ? "Uploading" : "Upload Image"}
             <input type="file" className="hidden" accept="image/*,video/*" onChange={uploadImage} />
           </label>
+          {uploadError && <p className="admin-media-error">{uploadError}</p>}
         </div>
       )}
 
-      <details className="builder-inspector-panel" open>
+      <details className="builder-inspector-panel is-advanced-data" open>
         <summary>Advanced section data</summary>
         <div className="builder-object-grid">
           <ObjectEditor value={value} path={section.path} onChange={onChange} />

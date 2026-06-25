@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, ArrowUpRight, Camera, MonitorPlay, Palette } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const ICONS = { Camera, MonitorPlay, Palette };
 
@@ -27,21 +28,24 @@ export default function HeroSection() {
   if (!hero.show) return null;
 
   const slide = slides[current % slides.length];
+  const slideImage = normalizeMediaUrl(slide.image);
   const leadingTitle = hero.outlineText ? hero.title.replace(hero.outlineText, "").trim() : hero.title;
 
   return (
     <section className="ashley-section relative flex min-h-[88svh] items-end overflow-hidden bg-black pb-14 pt-28">
       <AnimatePresence mode="wait">
-        <motion.img
-          key={slide.video || slide.image}
-          src={slide.image}
-          alt={slide.label}
-          className="absolute inset-0 h-full w-full object-cover"
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 0.38, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        />
+        {slideImage && (
+          <motion.img
+            key={slide.video || slideImage}
+            src={slideImage}
+            alt={slide.label}
+            className="absolute inset-0 h-full w-full object-cover"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 0.38, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
+        )}
       </AnimatePresence>
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.94),rgba(0,0,0,0.62),rgba(0,0,0,0.88))]" />
       <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black to-transparent" />

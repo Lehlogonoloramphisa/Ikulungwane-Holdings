@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ArrowUpRight, X } from "lucide-react";
 import { fallbackPortfolioProjects } from "@/data/portfolioFallback";
+import { normalizeMediaUrl } from "@/lib/media";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,7 +17,7 @@ const normalizeProject = (project, index) => {
     title: project.title || fallback.title,
     category: project.category || fallback.category,
     description: project.description || project.desc || fallback.description,
-    cover_image: project.cover_image || project.image || project.featured_image || fallback.cover_image,
+    cover_image: normalizeMediaUrl(project.cover_image || project.image || project.featured_image || fallback.cover_image),
   };
 };
 

@@ -19,6 +19,7 @@ export default function Booking() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [refNum, setRefNum] = useState("");
   const [form, setForm] = useState({
     full_name: "",
@@ -48,19 +49,25 @@ export default function Booking() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const ref = "IKU-" + Date.now().toString(36).toUpperCase();
-    const booking = {
-      ...form,
-      reference: ref,
-      status: "new",
-      deposit_amount: page.depositAmount,
-      confirmation_email: page.confirmationEmail,
-    };
-    await localApi.entities.Booking.create(booking);
-    await sendSiteEmail({ type: "booking", payload: booking, cms });
-    setRefNum(ref);
-    setSubmitted(true);
-    setLoading(false);
+    setError("");
+    try {
+      const ref = "IKU-" + Date.now().toString(36).toUpperCase();
+      const booking = {
+        ...form,
+        reference: ref,
+        status: "new",
+        deposit_amount: page.depositAmount,
+        confirmation_email: page.confirmationEmail,
+      };
+      await localApi.entities.Booking.create(booking);
+      await sendSiteEmail({ type: "booking", payload: booking, cms });
+      setRefNum(ref);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Your booking request could not be submitted. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -210,6 +217,8 @@ export default function Booking() {
               )}
             </motion.div>
           </AnimatePresence>
+
+          {error && <p className="form-error-message">{error}</p>}
 
           <div className="booking-actions">
             <button

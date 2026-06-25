@@ -5,6 +5,7 @@ import { ArrowRight, Users } from "lucide-react";
 import { localApi } from "@/api/localClient";
 import { useQuery } from "@tanstack/react-query";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const LIVE_TEAM = [
   {
@@ -135,27 +136,30 @@ export default function About() {
           <h2>{page.teamTitle}</h2>
         </div>
         <div className="about-team-strip">
-          {displayTeam.map((member, index) => (
-            <motion.article
-              key={member.id || member.name}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ delay: index * 0.08 }}
-            >
-              <div>
-                {member.photo ? (
-                  <img src={member.photo} alt={member.name} />
-                ) : (
-                  <span><Users /></span>
-                )}
-              </div>
-              <p>{String(index + 1).padStart(2, "0")}</p>
-              <h3>{member.name}</h3>
-              <em>{member.role}</em>
-              {member.bio && <small>{member.bio}</small>}
-            </motion.article>
-          ))}
+          {displayTeam.map((member, index) => {
+            const photo = normalizeMediaUrl(member.photo);
+            return (
+              <motion.article
+                key={member.id || member.name}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ delay: index * 0.08 }}
+              >
+                <div>
+                  {photo ? (
+                    <img src={photo} alt={member.name} />
+                  ) : (
+                    <span><Users /></span>
+                  )}
+                </div>
+                <p>{String(index + 1).padStart(2, "0")}</p>
+                <h3>{member.name}</h3>
+                <em>{member.role}</em>
+                {member.bio && <small>{member.bio}</small>}
+              </motion.article>
+            );
+          })}
         </div>
       </section>
 

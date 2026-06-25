@@ -5,7 +5,6 @@ import {
   CalendarCheck,
   Check,
   ExternalLink,
-  Image as ImageIcon,
   LayoutTemplate,
   Mail,
   Navigation,
@@ -19,14 +18,13 @@ import {
   ShieldCheck,
   Trash2,
   Type,
-  Upload,
   Wand2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { localApi } from "@/api/localClient";
+import AdminMediaField from "@/components/admin/AdminMediaField";
 import { cmsDefaults } from "@/data/cmsDefaults";
 import { applyBrandingVariables } from "@/lib/branding";
 import { deepMerge, getValueByPath, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
@@ -105,57 +103,6 @@ function Field({ label, value, onChange, type = "text", multiline = false, help,
   );
 }
 
-function ImageUploadField({ label, value, onUpload, onRemove, recommendedSize, help, accept = "image/png,image/jpeg,image/webp,image/svg+xml" }) {
-  const inputId = React.useId();
-
-  return (
-    <div className="admin-image-upload">
-      <div className="admin-image-upload-head">
-        <div>
-          <Label htmlFor={inputId}>{label}</Label>
-          <p>Recommended size: <strong>{recommendedSize}</strong></p>
-          {help && <span>{help}</span>}
-        </div>
-        <ImageIcon className="h-5 w-5" />
-      </div>
-
-      <div className="admin-image-upload-preview">
-        {value ? (
-          <img src={value} alt={`${label} preview`} />
-        ) : (
-          <div>
-            <ImageIcon className="h-6 w-6" />
-            <span>No image uploaded</span>
-          </div>
-        )}
-      </div>
-
-      <div className="admin-image-upload-actions">
-        <label htmlFor={inputId}>
-          <Upload className="h-4 w-4" />
-          {value ? "Replace image" : "Upload image"}
-        </label>
-        {value && (
-          <button type="button" onClick={onRemove}>
-            <Trash2 className="h-4 w-4" />
-            Remove
-          </button>
-        )}
-      </div>
-      <input
-        id={inputId}
-        type="file"
-        accept={accept}
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) onUpload(file);
-          event.target.value = "";
-        }}
-      />
-    </div>
-  );
-}
-
 function ToggleRow({ label, checked, onChange, help }) {
   return (
     <div className="admin-toggle-row">
@@ -189,7 +136,6 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTest, setEmailTest] = useState(null);
-  const [uploadingPath, setUploadingPath] = useState("");
   const [content, setContent] = useState(() => deepMerge(cmsDefaults, override));
 
   useEffect(() => {
@@ -232,16 +178,6 @@ export default function SettingsPage() {
     const url = makeWhatsappUrl(get("global.contact.whatsapp") || get("global.contact.phone"));
     update("global.contact.whatsappUrl", url);
     update("pages.home.cta.whatsappUrl", url);
-  };
-
-  const handleImageUpload = async (path, file) => {
-    setUploadingPath(path);
-    try {
-      const { file_url } = await localApi.integrations.Core.UploadFile({ file });
-      update(path, file_url);
-    } finally {
-      setUploadingPath("");
-    }
   };
 
   const handleSave = () => {
@@ -334,30 +270,27 @@ export default function SettingsPage() {
           {active === "identity" && (
             <SettingsSection title="Brand Identity" description="These fields control the visible studio name, logo text, footer identity, and brand language.">
               <div className="admin-upload-grid">
-                <ImageUploadField
-                  label={uploadingPath === "global.site.logoImage" ? "Uploading header logo..." : "Header logo image"}
+                <AdminMediaField
+                  label="Header logo image"
                   value={get("global.site.logoImage")}
                   recommendedSize="560 x 160 px, transparent PNG or SVG"
                   help="Used in the website header. Wide horizontal logos work best."
-                  onUpload={(file) => handleImageUpload("global.site.logoImage", file)}
-                  onRemove={() => update("global.site.logoImage", "")}
+                  onChange={(fileUrl) => update("global.site.logoImage", fileUrl)}
                 />
-                <ImageUploadField
-                  label={uploadingPath === "global.footer.logoImage" ? "Uploading footer logo..." : "Footer logo image"}
+                <AdminMediaField
+                  label="Footer logo image"
                   value={get("global.footer.logoImage")}
                   recommendedSize="720 x 240 px, transparent PNG or SVG"
                   help="Used in the footer. A slightly larger version gives cleaner scaling."
-                  onUpload={(file) => handleImageUpload("global.footer.logoImage", file)}
-                  onRemove={() => update("global.footer.logoImage", "")}
+                  onChange={(fileUrl) => update("global.footer.logoImage", fileUrl)}
                 />
-                <ImageUploadField
-                  label={uploadingPath === "global.site.favicon" ? "Uploading favicon..." : "Favicon"}
+                <AdminMediaField
+                  label="Favicon"
                   value={get("global.site.favicon")}
                   recommendedSize="512 x 512 px, PNG or ICO"
                   help="Used in the browser tab and bookmarks."
                   accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
-                  onUpload={(file) => handleImageUpload("global.site.favicon", file)}
-                  onRemove={() => update("global.site.favicon", "")}
+                  onChange={(fileUrl) => update("global.site.favicon", fileUrl)}
                 />
               </div>
               <div className="admin-form-grid">

@@ -18,6 +18,7 @@ import {
 import { localApi } from "@/api/localClient";
 import { useQuery } from "@tanstack/react-query";
 import { useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 const ICONS = { Camera, Video, Users, GraduationCap, Package, Plane, Palette, Globe, Megaphone, Lightbulb };
 
@@ -121,6 +122,7 @@ export default function Services() {
 
   const current = services[active] || services[0];
   const CurrentIcon = ICONS[current?.icon] || Camera;
+  const currentImage = normalizeMediaUrl(current?.image);
 
   return (
     <main className="interior-page services-page">
@@ -133,7 +135,7 @@ export default function Services() {
           </span>
         </div>
         <div className="services-hero-frame">
-          <img src={current.image} alt={current.title} />
+          {currentImage && <img src={currentImage} alt={current.title} />}
           <div>
             <CurrentIcon />
             <strong>{current.title}</strong>
@@ -170,7 +172,7 @@ export default function Services() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src={current.image} alt={current.title} />
+          {currentImage && <img src={currentImage} alt={current.title} />}
           <div>
             <p>{String(active + 1).padStart(2, "0")} / {services.length}</p>
             <h2>{current.title}</h2>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 export default function ProcessSection() {
   const [active, setActive] = useState(0);
@@ -10,6 +11,7 @@ export default function ProcessSection() {
   const section = cms.pages.home.process;
   const steps = orderedEnabled(section.steps);
   const current = steps[active] || steps[0];
+  const currentImage = normalizeMediaUrl(current?.image);
 
   if (!section.show || steps.length === 0) return null;
 
@@ -40,7 +42,7 @@ export default function ProcessSection() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <img src={current.image} alt={`${current.title} process`} />
+            {currentImage && <img src={currentImage} alt={`${current.title} process`} />}
             <span>{current.number} / {current.title}</span>
           </motion.div>
 

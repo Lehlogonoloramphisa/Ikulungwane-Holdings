@@ -47,7 +47,7 @@ const getStorage = () => {
 
 const runStarterSeed = async () => {
   const storage = getStorage();
-  if (!storage || storage.getItem(ADMIN_SEED_KEY)) {
+  if (!storage) {
     return false;
   }
 

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { normalizeMediaUrl } from "@/lib/media";
 
 export default function Footer() {
   const cms = useCms();
@@ -11,14 +12,15 @@ export default function Footer() {
   const socials = cms.global.socialLinks.filter((item) => item.enabled !== false && item.url);
   const quickLinks = orderedEnabled(footer.links);
   const legalLinks = orderedEnabled(footer.legalLinks);
+  const logoImage = normalizeMediaUrl(footer.logoImage);
 
   return (
     <footer className="relative border-t border-white/10 bg-black text-white/58">
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.9fr_1.1fr]">
           <div>
-            {footer.logoImage ? (
-              <img src={footer.logoImage} alt={footer.logoAlt || site.companyName} className="site-footer-logo" />
+            {logoImage ? (
+              <img src={logoImage} alt={footer.logoAlt || site.companyName} className="site-footer-logo" />
             ) : (
               <h3 className="site-footer-logo-text">
                 {footer.logoText}

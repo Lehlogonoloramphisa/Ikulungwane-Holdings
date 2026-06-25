@@ -4,6 +4,8 @@ const SESSION_KEY = "ikulungwane_local_session";
 const RESET_KEY = "ikulungwane_local_resets";
 const AUTH_ENDPOINT = "/api/auth.php";
 const SETUP_ENDPOINT = "/api/setup.php";
+const CONTENT_ENDPOINT = "/api/content.php";
+const UPLOAD_ENDPOINT = "/api/upload.php";
 
 const ENTITY_NAMES = [
   "BlogPost",
@@ -126,13 +128,30 @@ const sortItems = (items, sortBy) => {
 const limitItems = (items, limit) =>
   typeof limit === "number" ? items.slice(0, limit) : items;
 
+const shouldUseLocalFallback = (error) =>
+  error?.unavailable || error instanceof TypeError || [404, 503].includes(Number(error?.status));
+
 const createEntityApi = (entityName) => ({
   async list(sortBy, limit) {
+    try {
+      const result = await contentEntityRequest("list", entityName, { sortBy, limit });
+      if (Array.isArray(result.items)) return result.items;
+    } catch (error) {
+      if (!shouldUseLocalFallback(error)) throw error;
+    }
+
     const db = getDb();
     return clone(limitItems(sortItems(db[entityName], sortBy), limit));
   },
 
   async filter(criteria = {}, sortBy, limit) {
+    try {
+      const result = await contentEntityRequest("filter", entityName, { criteria, sortBy, limit });
+      if (Array.isArray(result.items)) return result.items;
+    } catch (error) {
+      if (!shouldUseLocalFallback(error)) throw error;
+    }
+
     const db = getDb();
     const filtered = db[entityName].filter((item) =>
       Object.entries(criteria).every(([key, value]) => item[key] === value)
@@ -141,6 +160,13 @@ const createEntityApi = (entityName) => ({
   },
 
   async create(data) {
+    try {
+      const result = await contentEntityRequest("create", entityName, { data });
+      if (result.item) return result.item;
+    } catch (error) {
+      if (!shouldUseLocalFallback(error)) throw error;
+    }
+
     const db = getDb();
     const now = new Date().toISOString();
     const item = {
@@ -156,6 +182,13 @@ const createEntityApi = (entityName) => ({
   },
 
   async update(id, data) {
+    try {
+      const result = await contentEntityRequest("update", entityName, { id, data });
+      if (result.item) return result.item;
+    } catch (error) {
+      if (!shouldUseLocalFallback(error)) throw error;
+    }
+
     const db = getDb();
     const index = db[entityName].findIndex((item) => item.id === id);
     if (index === -1) {
@@ -176,6 +209,13 @@ const createEntityApi = (entityName) => ({
   },
 
   async delete(id) {
+    try {
+      const result = await contentEntityRequest("delete", entityName, { id });
+      if (result.success) return result;
+    } catch (error) {
+      if (!shouldUseLocalFallback(error)) throw error;
+    }
+
     const db = getDb();
     db[entityName] = db[entityName].filter((item) => item.id !== id);
     saveDb(db);
@@ -268,6 +308,34 @@ const backendAuth = async (action, body) =>
     body,
   });
 
+function contentEntityRequest(action, entity, payload = {}) {
+  return backendRequest(CONTENT_ENDPOINT, action, {
+    method: "POST",
+    body: { entity, ...payload },
+  });
+}
+
+const uploadToBackend = async (file) => {
+  const body = new FormData();
+  body.append("file", file);
+
+  const response = await fetch(UPLOAD_ENDPOINT, {
+    method: "POST",
+    credentials: "include",
+    body,
+  });
+  const data = await parseApiJson(response);
+
+  if (!response.ok) {
+    const error = new Error(data.error || "Upload failed");
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
+
 export const localApi = {
   entities: ENTITY_NAMES.reduce((entities, entityName) => {
     entities[entityName] = createEntityApi(entityName);
@@ -283,15 +351,24 @@ export const localApi = {
             return;
           }
 
-          if (typeof FileReader === "undefined") {
-            resolve({ file_url: "" });
-            return;
-          }
+          uploadToBackend(file)
+            .then(resolve)
+            .catch((error) => {
+              if (!shouldUseLocalFallback(error)) {
+                reject(error);
+                return;
+              }
 
-          const reader = new FileReader();
-          reader.onload = () => resolve({ file_url: reader.result });
-          reader.onerror = () => reject(new Error("Unable to read file"));
-          reader.readAsDataURL(file);
+              if (typeof FileReader === "undefined") {
+                resolve({ file_url: "" });
+                return;
+              }
+
+              const reader = new FileReader();
+              reader.onload = () => resolve({ file_url: reader.result });
+              reader.onerror = () => reject(new Error("Unable to read file"));
+              reader.readAsDataURL(file);
+            });
         });
       },
     },
@@ -349,7 +426,7 @@ export const localApi = {
         // Fall back to local development storage.
       }
 
-      return getUsers().some((user) => user.role === "admin");
+      return getUsers().some((user) => ["admin", "super_admin"].includes(user.role));
     },
 
     async createAdminAccount({ email, password, full_name }) {
@@ -363,7 +440,7 @@ export const localApi = {
       }
 
       const users = getUsers();
-      if (users.some((user) => user.role === "admin")) {
+      if (users.some((user) => ["admin", "super_admin"].includes(user.role))) {
         throw new Error("An admin account already exists. Log in instead.");
       }
 

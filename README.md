@@ -15,6 +15,24 @@ npm run dev
 npm run build
 ```
 
+## Keeping Local And Live Views The Same
+
+Always publish the production build from this project, not source files from another folder:
+
+```bash
+npm install
+npm run build
+```
+
+Use the generated `dist` folder as the publish folder. The deployment files in this repo are set up so the live site uses the same compiled CSS and JavaScript that you see after building locally:
+
+- `netlify.toml` tells Netlify to run `npm run build` and publish `dist`.
+- `public/_redirects` keeps React routes such as `/portfolio`, `/booking`, and `/admin/login` working after refresh.
+- `public/_headers` and `.htaccess` stop `index.html` from being cached too long, so new CSS updates appear after each deploy.
+- Hashed files in `/assets` are cached safely because each new build gets new filenames.
+
+After deploying, hard refresh the website once if your browser still shows an old view.
+
 ## Deploy To cPanel
 
 Build the site:

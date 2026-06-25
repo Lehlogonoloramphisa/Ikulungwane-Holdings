@@ -4,6 +4,7 @@ import { localApi } from "@/api/localClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 const STATUSES = ["new", "contacted", "qualified", "converted", "closed"];
 const statusColors = {
@@ -49,12 +50,15 @@ export default function LeadsManagement() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-white">Leads & Enquiries</h1>
-          <p className="text-white/40 text-sm font-body mt-1">{filtered.length} enquiries</p>
-        </div>
+    <div className="admin-list-page">
+      <AdminPageHeader
+        eyebrow="Clients"
+        title="Leads"
+        description="Manage enquiries from the contact form, call or email clients, and move each lead through the pipeline."
+        count={`${filtered.length} enquiries`}
+      />
+
+      <div className="admin-toolbar">
         <div className="relative w-full lg:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
           <input
@@ -67,18 +71,18 @@ export default function LeadsManagement() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => setFilter("all")} className={`px-3 py-2 text-xs uppercase tracking-wider font-body border transition-all ${filter === "all" ? "border-primary text-primary" : "border-white/10 text-white/40"}`}>All</button>
+      <div className="admin-filter-group">
+        <button onClick={() => setFilter("all")} className={`admin-filter-button ${filter === "all" ? "is-active" : ""}`}>All</button>
         {STATUSES.map((s) => (
-          <button key={s} onClick={() => setFilter(s)} className={`px-3 py-2 text-xs uppercase tracking-wider font-body border transition-all ${filter === s ? "border-primary text-primary" : "border-white/10 text-white/40"}`}>
+          <button key={s} onClick={() => setFilter(s)} className={`admin-filter-button ${filter === s ? "is-active" : ""}`}>
             {s}
           </button>
         ))}
       </div>
 
-      <div className="space-y-3">
+      <div className="admin-list-stack">
         {filtered.map((lead) => (
-          <div key={lead.id} className="p-5 border border-white/5 bg-white/[0.02]">
+          <article key={lead.id} className="admin-list-card is-column">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p className="text-white font-body font-medium">{lead.name}</p>
@@ -117,9 +121,9 @@ export default function LeadsManagement() {
             {lead.service_interested && <p className="text-primary text-xs uppercase tracking-wider font-body mt-2">Interested in: {lead.service_interested}</p>}
             <p className="text-white/50 text-sm font-body mt-2 leading-relaxed">{lead.message}</p>
             <p className="text-white/20 text-xs font-body mt-3">{lead.created_date ? format(new Date(lead.created_date), "MMM d, yyyy 'at' HH:mm") : ""}</p>
-          </div>
+          </article>
         ))}
-        {filtered.length === 0 && <p className="py-16 text-center text-white/30 text-sm font-body">No enquiries found</p>}
+        {filtered.length === 0 && <p className="admin-empty-copy">No enquiries found</p>}
       </div>
     </div>
   );
