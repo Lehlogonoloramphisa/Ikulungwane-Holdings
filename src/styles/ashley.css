@@ -34,12 +34,16 @@ body {
 }
 
 :where(.ashley-shell, .interior-page) :where(h1, h2, h3, h4) {
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
   text-wrap: balance;
 }
 
 :where(.ashley-shell, .interior-page) :where(p, span, em) {
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .ashley-shell :where(input, textarea, select, button) {
@@ -1979,7 +1983,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .legal-readable-head span {
   display: block;
   margin-top: 6px;
-  color: rgba(0, 0, 0, 0.52);
+  color: rgba(255, 255, 255, 0.58);
   font-size: 14px;
   font-weight: 800;
 }
@@ -1993,7 +1997,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 999px;
   padding: 0 16px;
-  color: rgba(0, 0, 0, 0.72);
+  color: rgba(255, 255, 255, 0.74);
   font-size: 11px;
   font-weight: 950;
   text-transform: uppercase;
@@ -2009,7 +2013,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   display: grid;
   gap: 20px;
   max-width: 820px;
-  color: rgba(0, 0, 0, 0.62);
+  color: rgba(255, 255, 255, 0.68);
   font-size: clamp(16px, 1.6vw, 18px);
   line-height: 1.9;
 }
@@ -9079,5 +9083,137 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-intro-copy span,
   .cinema-case-content span {
     font-size: 16px;
+  }
+}
+
+/* Final readability guards: keep words intact and give About story room to breathe. */
+.ashley-shell,
+.interior-page {
+  word-break: normal;
+  hyphens: none;
+}
+
+.ashley-shell :where(h1, h2, h3, h4, p, span, em, strong, a, button),
+.interior-page :where(h1, h2, h3, h4, p, span, em, strong, a, button) {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+.about-story-section {
+  align-items: start;
+  width: min(100% - 56px, 1180px);
+  grid-template-columns: minmax(96px, 0.18fr) minmax(0, 1fr) minmax(250px, 0.42fr);
+  gap: clamp(28px, 3.4vw, 52px);
+}
+
+.about-story-kicker {
+  position: sticky;
+  top: 118px;
+  width: max-content;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.about-story-copy {
+  max-width: 690px;
+  min-width: 0;
+}
+
+.about-story-copy h2 {
+  max-width: 12ch;
+  margin-bottom: clamp(18px, 2vw, 28px);
+  line-height: 1.02;
+}
+
+.about-story-copy p {
+  max-width: 66ch;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.9;
+}
+
+.about-story-copy p + p {
+  margin-top: clamp(14px, 1.7vw, 22px);
+}
+
+.about-values {
+  align-self: stretch;
+  border-top: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  padding-left: clamp(18px, 2.3vw, 30px);
+}
+
+.about-values div {
+  padding: clamp(15px, 1.8vw, 22px) 0;
+}
+
+.about-values div:first-child {
+  padding-top: 0;
+}
+
+.about-values strong {
+  max-width: 22ch;
+  margin-top: 8px;
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.45;
+}
+
+@media (min-width: 1024px) {
+  .about-story-section {
+    width: min(calc(100% - 64px), 1180px);
+    gap: clamp(30px, 3vw, 50px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .about-story-section {
+    grid-template-columns: 1fr;
+    width: min(100% - 44px, 860px);
+    gap: 28px;
+  }
+
+  .about-story-kicker {
+    position: relative;
+    top: auto;
+  }
+
+  .about-story-copy {
+    max-width: 760px;
+  }
+
+  .about-story-copy h2 {
+    max-width: 14ch;
+  }
+
+  .about-values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 24px;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    padding-left: 0;
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-story-section {
+    width: min(100% - 32px, 560px);
+    padding-top: 78px;
+    padding-bottom: 78px;
+  }
+
+  .about-story-copy h2 {
+    max-width: 11ch;
+    font-size: clamp(30px, 11vw, 42px);
+  }
+
+  .about-story-copy p {
+    font-size: 15px;
+    line-height: 1.82;
+  }
+
+  .about-values {
+    grid-template-columns: 1fr;
   }
 }

@@ -31,7 +31,7 @@ export default function BlogPost() {
         <PageHero title="Post Not Found" subtitle="Journal" />
         <section className="ashley-white-section py-20">
           <div className="relative mx-auto max-w-3xl px-6">
-            <p className="text-black/55">The journal post you are looking for is not available.</p>
+            <p className="text-white/60">The journal post you are looking for is not available.</p>
             <Link to="/blog" className="ashley-button ashley-button-dark mt-8">
               <ArrowLeft className="h-4 w-4" />
               Back to Journal
@@ -50,12 +50,12 @@ export default function BlogPost() {
 
       <article className="ashley-white-section py-16 md:py-24">
         <div className="relative mx-auto max-w-4xl px-6">
-          <Link to="/blog" className="mb-10 inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-black/46 transition-colors hover:text-black">
+          <Link to="/blog" className="mb-10 inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-white/60 transition-colors hover:text-white">
             <ArrowLeft className="h-4 w-4" />
             Back to Journal
           </Link>
 
-          <div className="mb-10 flex flex-wrap gap-5 border-y border-black/10 py-5 text-xs uppercase tracking-[0.14em] text-black/46">
+          <div className="mb-10 flex flex-wrap gap-5 border-y border-white/10 py-5 text-xs uppercase tracking-[0.14em] text-white/60">
             <span className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-[var(--ashley-accent)]" />
               {post.created_date ? format(new Date(post.created_date), "MMM d, yyyy") : "Undated"}
@@ -66,7 +66,7 @@ export default function BlogPost() {
             </span>
           </div>
 
-          <div className="space-y-7 text-lg leading-8 text-black/62">
+          <div className="space-y-7 text-lg leading-8 text-white/70">
             {paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

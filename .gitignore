@@ -5,6 +5,7 @@ public/api/email-config.php
 public/api/config/database.php
 dist/api/email-config.php
 dist/api/config/database.php
+dist/api/uploads/
 
 # Logs
 /logs
@@ -16,7 +17,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
 

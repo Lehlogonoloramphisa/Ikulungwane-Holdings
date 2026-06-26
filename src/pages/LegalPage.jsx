@@ -57,7 +57,7 @@ export default function LegalPage({ page: pageProp }) {
       <PageHero title={title} subtitle={legalDocument?.footer_label || "Legal"} />
       <section className="ashley-white-section legal-page-section py-16 md:py-24">
         <div className="legal-page-shell relative mx-auto px-6">
-          <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-black/46 transition-colors hover:text-black">
+          <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-white/60 transition-colors hover:text-white">
             <ArrowLeft className="h-4 w-4" />
             Back Home
           </Link>
