@@ -273,15 +273,15 @@ export default function SettingsPage() {
                 <AdminMediaField
                   label="Header logo image"
                   value={get("global.site.logoImage")}
-                  recommendedSize="560 x 160 px, transparent PNG or SVG"
-                  help="Used in the website header. Wide horizontal logos work best."
+                  recommendedSize="Horizontal: about 300 x 120 px. Vertical: about 200 x 200 px. SVG or transparent PNG recommended."
+                  help="Used in the website header. Display height is kept around 40-60 px on desktop and 32-48 px on mobile. If the logo is very tall, upload a horizontal header version."
                   onChange={(fileUrl) => update("global.site.logoImage", fileUrl)}
                 />
                 <AdminMediaField
                   label="Footer logo image"
                   value={get("global.footer.logoImage")}
-                  recommendedSize="720 x 240 px, transparent PNG or SVG"
-                  help="Used in the footer. A slightly larger version gives cleaner scaling."
+                  recommendedSize="Vertical/full logo: about 400 x 400 px, exported at 2x resolution for sharpness."
+                  help="Used in the footer. Display height is kept around 60-100 px, so the full vertical logo can be used here if it needs more space."
                   onChange={(fileUrl) => update("global.footer.logoImage", fileUrl)}
                 />
                 <AdminMediaField

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Edit, Trash2, Image, Star } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Image, Images, Plus, Star, Trash2, Upload, Edit } from "lucide-react";
 import { localApi } from "@/api/localClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -19,35 +19,148 @@ const emptyProject = {
   title: "", slug: "", category: "weddings", cover_image: "", description: "",
   images: [], video_url: "", client_name: "", client_testimonial: "",
   location: "", date: "", featured: false, published: true, metadata: "",
+  order: 0, gallery_images: [],
+};
+
+const galleryUrl = (image) => normalizeMediaUrl(typeof image === "string" ? image : image?.image_url);
+
+const renumberGallery = (images = []) =>
+  images.map((image, index) => ({ ...image, sort_order: index + 1 }));
+
+const normalizeGalleryImages = (project = {}) => {
+  const coverUrl = normalizeMediaUrl(project.cover_image);
+  const source = Array.isArray(project.gallery_images) && project.gallery_images.length > 0
+    ? project.gallery_images
+    : (Array.isArray(project.images) ? project.images : []);
+
+  return renumberGallery(
+    source
+      .map((image, index) => {
+        const image_url = galleryUrl(image);
+        if (!image_url || image_url === coverUrl) return null;
+        return {
+          id: typeof image === "object" && image?.id ? image.id : `gallery-${Date.now()}-${index}`,
+          project_id: project.id || "",
+          image_url,
+          caption: typeof image === "object" ? image.caption || image.alt_text || "" : "",
+          sort_order: Number(image?.sort_order ?? image?.display_order ?? index + 1),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order))
+  );
+};
+
+const galleryPayload = (project) => {
+  const gallery_images = renumberGallery(project.gallery_images || []);
+  return {
+    ...project,
+    gallery_images,
+    images: gallery_images.map((image) => image.image_url),
+  };
 };
 
 export default function PortfolioManagement() {
   const [editing, setEditing] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imageEditing, setImageEditing] = useState(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: projects } = useQuery({
     queryKey: ["admin-portfolio"],
-    queryFn: () => localApi.entities.PortfolioProject.list("-created_date", 100),
+    queryFn: () => localApi.entities.PortfolioProject.list("order", 100),
     initialData: [],
   });
 
+  const invalidatePortfolio = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-portfolio"] });
+    queryClient.invalidateQueries({ queryKey: ["portfolio"] });
+    queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+  };
+
   const saveMutation = useMutation({
     mutationFn: (data) => {
-      const payload = { ...data, slug: data.slug || slugify(data.title) };
+      const payload = galleryPayload({ ...data, slug: data.slug || slugify(data.title) });
       if (payload.id) return localApi.entities.PortfolioProject.update(payload.id, payload);
       return localApi.entities.PortfolioProject.create(payload);
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-portfolio"] }); setDialogOpen(false); setEditing(null); },
+    onSuccess: () => { invalidatePortfolio(); setDialogOpen(false); setEditing(null); },
+  });
+
+  const saveImagesMutation = useMutation({
+    mutationFn: (data) => localApi.entities.PortfolioProject.update(data.id, galleryPayload(data)),
+    onSuccess: () => { invalidatePortfolio(); setImageDialogOpen(false); setImageEditing(null); },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.PortfolioProject.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-portfolio"] }),
+    onSuccess: invalidatePortfolio,
   });
 
   const handleNew = () => { setEditing({ ...emptyProject }); setDialogOpen(true); };
-  const handleEdit = (project) => { setEditing({ ...project }); setDialogOpen(true); };
+  const handleEdit = (project) => { setEditing({ ...project, gallery_images: normalizeGalleryImages(project) }); setDialogOpen(true); };
+  const handleManageImages = (project) => {
+    setImageEditing({ ...project, gallery_images: normalizeGalleryImages(project) });
+    setImageDialogOpen(true);
+  };
+
+  const updateGalleryImage = (index, patch) => {
+    setImageEditing((current) => ({
+      ...current,
+      gallery_images: renumberGallery((current.gallery_images || []).map((image, imageIndex) => (
+        imageIndex === index ? { ...image, ...patch } : image
+      ))),
+    }));
+  };
+
+  const moveGalleryImage = (index, direction) => {
+    setImageEditing((current) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= (current.gallery_images || []).length) return current;
+      const nextImages = [...(current.gallery_images || [])];
+      [nextImages[index], nextImages[nextIndex]] = [nextImages[nextIndex], nextImages[index]];
+      return { ...current, gallery_images: renumberGallery(nextImages) };
+    });
+  };
+
+  const removeGalleryImage = (index) => {
+    setImageEditing((current) => ({
+      ...current,
+      gallery_images: renumberGallery((current.gallery_images || []).filter((_, imageIndex) => imageIndex !== index)),
+    }));
+  };
+
+  const handleGalleryUpload = async (files) => {
+    const selected = Array.from(files || []);
+    if (!selected.length) return;
+
+    setUploadingGallery(true);
+    try {
+      const uploaded = [];
+      for (const file of selected) {
+        const result = await localApi.integrations.Core.UploadFile({ file });
+        if (result.file_url) {
+          uploaded.push({
+            id: `gallery-${Date.now()}-${uploaded.length}`,
+            project_id: imageEditing?.id || "",
+            image_url: result.file_url,
+            caption: "",
+            sort_order: (imageEditing?.gallery_images?.length || 0) + uploaded.length + 1,
+          });
+        }
+      }
+      setImageEditing((current) => ({
+        ...current,
+        gallery_images: renumberGallery([...(current.gallery_images || []), ...uploaded]),
+      }));
+    } catch (error) {
+      window.alert(error.message || "Could not upload the selected images.");
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
 
   return (
     <div className="admin-list-page">
@@ -55,10 +168,10 @@ export default function PortfolioManagement() {
         eyebrow="Content"
         title="Portfolio"
         description="Manage the work shown across the portfolio and home selected work sections."
-        count={`${projects.length} projects`}
+        count={`${projects.length} categories`}
         actions={(
           <button onClick={handleNew} className="admin-primary-action">
-          <Plus className="w-4 h-4" /> Add Project
+          <Plus className="w-4 h-4" /> Add Portfolio Category
           </button>
         )}
       />
@@ -80,11 +193,17 @@ export default function PortfolioManagement() {
               </div>
             </div>
             <div className="p-4">
-              <p className="text-primary text-[10px] uppercase tracking-wider font-body">{project.category}</p>
+              <p className="text-primary text-[10px] uppercase tracking-wider font-body">
+                {String(project.order || 0).padStart(2, "0")} / {project.category}
+              </p>
               <h3 className="text-white font-body font-medium mt-1">{project.title}</h3>
+              <p className="mt-2 text-xs text-white/40">{normalizeGalleryImages(project).length} gallery images</p>
               <div className="admin-record-actions">
                 <button onClick={() => handleEdit(project)}>
                   <Edit className="w-3 h-3" /> Edit
+                </button>
+                <button onClick={() => handleManageImages(project)}>
+                  <Images className="w-3 h-3" /> Manage Images
                 </button>
                 <button onClick={() => { if (confirm("Delete this project?")) deleteMutation.mutate(project.id); }} className="is-danger">
                   <Trash2 className="w-3 h-3" /> Delete
@@ -100,12 +219,12 @@ export default function PortfolioManagement() {
         <DialogContent className="bg-[#111] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl text-white">
-              {editing?.id ? "Edit Project" : "New Project"}
+              {editing?.id ? "Edit Portfolio Category" : "New Portfolio Category"}
             </DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="admin-dialog-form">
-              <Input placeholder="Project Title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className="bg-white/5 border-white/10 text-white" />
+              <Input placeholder="Title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Input placeholder="URL Slug" value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} className="bg-white/5 border-white/10 text-white" />
               <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v })}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
@@ -113,14 +232,15 @@ export default function PortfolioManagement() {
                   {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Input type="number" placeholder="Order Number" value={editing.order} onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })} className="bg-white/5 border-white/10 text-white" />
               <Textarea placeholder="Description" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className="bg-white/5 border-white/10 text-white min-h-[100px]" />
               
               <AdminMediaField
                 label="Cover Image"
                 value={editing.cover_image}
                 recommendedSize="1600 x 1000 px or larger"
-                help="Shown in portfolio previews, case studies, and selected work."
-                onChange={(fileUrl) => setEditing({ ...editing, cover_image: fileUrl, images: fileUrl ? [fileUrl] : [] })}
+                help="The main image shown on the portfolio category card. Gallery images are managed separately."
+                onChange={(fileUrl) => setEditing({ ...editing, cover_image: fileUrl })}
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -147,6 +267,102 @@ export default function PortfolioManagement() {
                 className="w-full py-3 bg-primary text-obsidian font-body font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
               >
                 {saveMutation.isPending ? "Saving..." : "Save Project"}
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="bg-[#111] border-white/10 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-white">
+              Manage Images{imageEditing?.title ? `: ${imageEditing.title}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+
+          {imageEditing && (
+            <div className="portfolio-image-manager">
+              <AdminMediaField
+                label="Cover Image"
+                value={imageEditing.cover_image}
+                recommendedSize="1600 x 1000 px or larger"
+                help="This is the main image used on the portfolio category card and shown first in the public gallery."
+                onChange={(fileUrl) => setImageEditing({ ...imageEditing, cover_image: fileUrl })}
+              />
+
+              <div className="portfolio-gallery-toolbar">
+                <div>
+                  <p className="admin-eyebrow">Gallery Images</p>
+                  <h3>{(imageEditing.gallery_images || []).length} images under this category</h3>
+                </div>
+                <label>
+                  <Upload className="h-4 w-4" />
+                  {uploadingGallery ? "Uploading..." : "Upload More Images"}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    onChange={(event) => {
+                      handleGalleryUpload(event.target.files);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="portfolio-gallery-list">
+                {(imageEditing.gallery_images || []).map((imageItem, index) => (
+                  <article key={imageItem.id || imageItem.image_url} className="portfolio-gallery-editor-card">
+                    <div className="portfolio-gallery-thumb">
+                      {normalizeMediaUrl(imageItem.image_url) ? (
+                        <img src={normalizeMediaUrl(imageItem.image_url)} alt={imageItem.caption || imageEditing.title} />
+                      ) : (
+                        <Image className="h-6 w-6 text-white/30" />
+                      )}
+                    </div>
+                    <div className="portfolio-gallery-fields">
+                      <Input
+                        value={imageItem.image_url}
+                        onChange={(event) => updateGalleryImage(index, { image_url: normalizeMediaUrl(event.target.value) })}
+                        placeholder="Image URL or Google Drive link"
+                      />
+                      <Input
+                        value={imageItem.caption || ""}
+                        onChange={(event) => updateGalleryImage(index, { caption: event.target.value })}
+                        placeholder="Caption"
+                      />
+                    </div>
+                    <div className="portfolio-gallery-actions">
+                      <button type="button" onClick={() => moveGalleryImage(index, -1)} disabled={index === 0} aria-label="Move image up">
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button type="button" onClick={() => moveGalleryImage(index, 1)} disabled={index === imageEditing.gallery_images.length - 1} aria-label="Move image down">
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                      <button type="button" onClick={() => setImageEditing({ ...imageEditing, cover_image: imageItem.image_url })}>
+                        <Check className="h-4 w-4" />
+                        Set Cover
+                      </button>
+                      <button type="button" className="is-danger" onClick={() => removeGalleryImage(index)}>
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))}
+                {(imageEditing.gallery_images || []).length === 0 && (
+                  <p className="admin-empty-copy">No extra images yet. Upload images to build this category gallery.</p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => saveImagesMutation.mutate(imageEditing)}
+                disabled={saveImagesMutation.isPending || uploadingGallery}
+                className="admin-primary-action w-full"
+              >
+                {saveImagesMutation.isPending ? "Saving..." : "Save Gallery Order"}
               </button>
             </div>
           )}

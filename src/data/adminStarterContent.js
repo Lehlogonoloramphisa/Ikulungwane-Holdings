@@ -2,14 +2,13 @@ import { fallbackBlogPosts } from "@/data/fallbackContent";
 import { fallbackPortfolioProjects } from "@/data/portfolioFallback";
 
 const portfolioCategoryMap = {
-  "wedding-editorial": "weddings",
-  "gala-after-dark": "events",
-  "graduation-archive": "graduations",
-  "urban-lifestyle": "lifestyle",
-  "brand-story": "corporate",
-  "light-study": "product",
-  "film-room": "videography",
-  "studio-portraits": "lifestyle",
+  "studio-portrait-series": "lifestyle",
+  qmane: "weddings",
+  "corporate-excellence-gala": "corporate",
+  "class-of-2024-graduation": "graduations",
+  "urban-lifestyle-collection": "lifestyle",
+  "brand-story-campaign": "corporate",
+  "product-light-study": "product",
 };
 
 export const starterPortfolioProjects = fallbackPortfolioProjects.map((project, index) => ({
@@ -18,7 +17,16 @@ export const starterPortfolioProjects = fallbackPortfolioProjects.map((project, 
   category: portfolioCategoryMap[project.id] || "events",
   cover_image: project.cover_image,
   description: project.description,
-  images: [project.cover_image],
+  images: (project.gallery_images || [])
+    .map((image) => image.image_url)
+    .filter((imageUrl) => imageUrl && imageUrl !== project.cover_image),
+  gallery_images: (project.gallery_images || [])
+    .filter((image) => image.image_url && image.image_url !== project.cover_image)
+    .map((image, imageIndex) => ({
+      image_url: image.image_url,
+      caption: image.caption || "",
+      sort_order: imageIndex + 1,
+    })),
   video_url: "",
   client_name: "Ikulungwane Studio",
   client_testimonial: "",

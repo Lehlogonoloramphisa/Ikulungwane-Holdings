@@ -1,8 +1,8 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, ArrowUpRight, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "lucide-react";
 import { fallbackPortfolioProjects } from "@/data/portfolioFallback";
 import { normalizeMediaUrl } from "@/lib/media";
 
@@ -10,14 +10,38 @@ gsap.registerPlugin(ScrollTrigger);
 
 const WIDTH_CLASSES = ["is-wide", "is-tall", "is-hero", "is-medium", "is-wide", "is-tall"];
 
+const normalizeProjectImage = (image) => normalizeMediaUrl(typeof image === "string" ? image : image?.image_url);
+
 const normalizeProject = (project, index) => {
   const fallback = fallbackPortfolioProjects[index % fallbackPortfolioProjects.length];
+  const coverImage = normalizeMediaUrl(project.cover_image || project.image || project.featured_image || fallback.cover_image);
+  const gallerySource = Array.isArray(project.gallery_images) && project.gallery_images.length > 0
+    ? project.gallery_images
+    : (Array.isArray(project.images) ? project.images : []);
+  const galleryImages = gallerySource
+    .map((image, imageIndex) => {
+      const imageUrl = normalizeProjectImage(image);
+      if (!imageUrl || imageUrl === coverImage) return null;
+      return {
+        id: image?.id || `${project.id || project.slug || fallback.id}-${imageIndex}`,
+        image_url: imageUrl,
+        caption: typeof image === "object" ? image.caption || image.alt_text || "" : "",
+        sort_order: Number(image?.sort_order ?? image?.display_order ?? imageIndex + 1),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   return {
     id: project.id || project.slug || fallback.id,
     title: project.title || fallback.title,
     category: project.category || fallback.category,
     description: project.description || project.desc || fallback.description,
-    cover_image: normalizeMediaUrl(project.cover_image || project.image || project.featured_image || fallback.cover_image),
+    cover_image: coverImage,
+    gallery_images: [
+      { id: `${project.id || fallback.id}-cover`, image_url: coverImage, caption: "Cover image", sort_order: 0 },
+      ...galleryImages,
+    ].filter((image) => image.image_url),
   };
 };
 
@@ -38,6 +62,7 @@ export default function CinematicPortfolioExperience({
   const overlayImageRef = useRef(null);
   const [stickyIndex, setStickyIndex] = useState(0);
   const [caseStudy, setCaseStudy] = useState(null);
+  const [activeCaseImageIndex, setActiveCaseImageIndex] = useState(null);
 
   const display = useMemo(() => {
     const source = projects.length > 0 ? projects : fallbackPortfolioProjects;
@@ -62,6 +87,8 @@ export default function CinematicPortfolioExperience({
   }, []);
 
   const closeCaseStudy = useCallback(() => {
+    setActiveCaseImageIndex(null);
+
     if (!overlayRef.current) {
       setCaseStudy(null);
       return;
@@ -74,6 +101,44 @@ export default function CinematicPortfolioExperience({
       onComplete: () => setCaseStudy(null),
     });
   }, []);
+
+  const activeCaseImage =
+    caseStudy && activeCaseImageIndex !== null
+      ? caseStudy.project.gallery_images?.[activeCaseImageIndex]
+      : null;
+
+  const moveCaseImage = useCallback((direction) => {
+    const images = caseStudy?.project.gallery_images || [];
+    if (images.length === 0) return;
+
+    setActiveCaseImageIndex((current) => {
+      const currentIndex = typeof current === "number" ? current : 0;
+      return (currentIndex + direction + images.length) % images.length;
+    });
+  }, [caseStudy]);
+
+  useEffect(() => {
+    if (!caseStudy) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (activeCaseImageIndex !== null) {
+          setActiveCaseImageIndex(null);
+          return;
+        }
+
+        closeCaseStudy();
+      }
+
+      if (activeCaseImageIndex === null) return;
+
+      if (event.key === "ArrowLeft") moveCaseImage(-1);
+      if (event.key === "ArrowRight") moveCaseImage(1);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeCaseImageIndex, caseStudy, closeCaseStudy, moveCaseImage]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -439,9 +504,16 @@ export default function CinematicPortfolioExperience({
 
       {caseStudy && (
         <div ref={overlayRef} className="cinema-case-study" role="dialog" aria-modal="true">
-          <div ref={overlayImageRef} className="cinema-case-image">
+          <button
+            type="button"
+            ref={overlayImageRef}
+            className="cinema-case-image"
+            onClick={() => setActiveCaseImageIndex(0)}
+            aria-label={`View ${caseStudy.project.title} cover fullscreen`}
+          >
             <img src={caseStudy.project.cover_image} alt={caseStudy.project.title} />
-          </div>
+            <span>View Fullscreen</span>
+          </button>
           <button type="button" className="cinema-case-close" onClick={closeCaseStudy} aria-label="Close project">
             <X />
           </button>
@@ -449,7 +521,61 @@ export default function CinematicPortfolioExperience({
             <p>{caseStudy.project.category}</p>
             <h2>{caseStudy.project.title}</h2>
             <span>{caseStudy.project.description}</span>
+            {caseStudy.project.gallery_images?.length > 1 && (
+              <div className="cinema-case-gallery">
+                {caseStudy.project.gallery_images.map((image, index) => (
+                  <figure key={image.id || image.image_url}>
+                    <button
+                      type="button"
+                      className="cinema-case-gallery-button"
+                      onClick={() => setActiveCaseImageIndex(index)}
+                      aria-label={`View ${image.caption || `${caseStudy.project.title} image ${index + 1}`} fullscreen`}
+                    >
+                      <img src={image.image_url} alt={image.caption || `${caseStudy.project.title} image ${index + 1}`} />
+                    </button>
+                    {image.caption && image.caption !== "Cover image" && <figcaption>{image.caption}</figcaption>}
+                  </figure>
+                ))}
+              </div>
+            )}
           </div>
+
+          {activeCaseImage && (
+            <div className="portfolio-image-lightbox" role="dialog" aria-modal="true" aria-label="Fullscreen selected work image">
+              <button
+                type="button"
+                className="portfolio-image-lightbox-close"
+                onClick={() => setActiveCaseImageIndex(null)}
+                aria-label="Close fullscreen image"
+              >
+                <X />
+              </button>
+              <button
+                type="button"
+                className="portfolio-image-lightbox-nav is-prev"
+                onClick={() => moveCaseImage(-1)}
+                aria-label="Previous image"
+              >
+                <ArrowLeft />
+              </button>
+              <img
+                src={activeCaseImage.image_url}
+                alt={activeCaseImage.caption || `${caseStudy.project.title} image`}
+              />
+              <button
+                type="button"
+                className="portfolio-image-lightbox-nav is-next"
+                onClick={() => moveCaseImage(1)}
+                aria-label="Next image"
+              >
+                <ArrowRight />
+              </button>
+              <div className="portfolio-image-lightbox-caption">
+                <p>{caseStudy.project.title}</p>
+                <span>{activeCaseImage.caption || caseStudy.project.category}</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>

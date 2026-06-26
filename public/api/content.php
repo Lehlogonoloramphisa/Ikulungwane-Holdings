@@ -285,6 +285,7 @@ function public_row($entity, $row) {
             'order' => (int) ($row['display_order'] ?? 0),
             'metadata' => $row['metadata'] ?? '',
             'images' => $row['images'] ?? [],
+            'gallery_images' => $row['gallery_images'] ?? [],
         ];
     }
 
@@ -383,14 +384,25 @@ function hydrate_rows(PDO $pdo, $entity, $rows) {
     if ($entity === 'PortfolioProject') {
         $ids = array_column($rows, 'id');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $pdo->prepare("SELECT project_id, image_url, alt_text, display_order FROM portfolio_project_images WHERE project_id IN ($placeholders) ORDER BY display_order ASC, id ASC");
+        $stmt = $pdo->prepare("SELECT id, project_id, image_url, alt_text, display_order FROM portfolio_project_images WHERE project_id IN ($placeholders) ORDER BY display_order ASC, id ASC");
         $stmt->execute($ids);
         $images = [];
+        $gallery_images = [];
         foreach ($stmt->fetchAll() as $image) {
-            $images[(int) $image['project_id']][] = $image['image_url'];
+            $project_id = (int) $image['project_id'];
+            $images[$project_id][] = $image['image_url'];
+            $gallery_images[$project_id][] = [
+                'id' => (string) $image['id'],
+                'project_id' => (string) $image['project_id'],
+                'image_url' => $image['image_url'],
+                'caption' => $image['alt_text'] ?? '',
+                'sort_order' => (int) ($image['display_order'] ?? 0),
+            ];
         }
         foreach ($rows as &$row) {
-            $row['images'] = $images[(int) $row['id']] ?? array_values(array_filter([$row['cover_image'] ?? '']));
+            $project_id = (int) $row['id'];
+            $row['images'] = $images[$project_id] ?? array_values(array_filter([$row['cover_image'] ?? '']));
+            $row['gallery_images'] = $gallery_images[$project_id] ?? [];
         }
     }
 
@@ -478,12 +490,37 @@ function list_entity(PDO $pdo, $entity, $config, $body, $admin) {
 }
 
 function save_related(PDO $pdo, $entity, $id, $data) {
-    if ($entity === 'PortfolioProject' && array_key_exists('images', $data)) {
+    if ($entity === 'PortfolioProject' && (array_key_exists('images', $data) || array_key_exists('gallery_images', $data))) {
         $pdo->prepare('DELETE FROM portfolio_project_images WHERE project_id = ?')->execute([$id]);
-        $images = is_array($data['images']) ? $data['images'] : [];
-        $stmt = $pdo->prepare('INSERT INTO portfolio_project_images (project_id, image_url, display_order) VALUES (?, ?, ?)');
-        foreach (array_values(array_filter($images)) as $index => $image) {
-            $stmt->execute([$id, $image, $index + 1]);
+
+        $gallery_images = [];
+        if (array_key_exists('gallery_images', $data) && is_array($data['gallery_images'])) {
+            foreach ($data['gallery_images'] as $image) {
+                if (is_array($image)) {
+                    $image_url = trim((string) ($image['image_url'] ?? ''));
+                    if ($image_url === '') continue;
+                    $gallery_images[] = [
+                        'image_url' => $image_url,
+                        'caption' => (string) ($image['caption'] ?? ''),
+                    ];
+                } else {
+                    $image_url = trim((string) $image);
+                    if ($image_url === '') continue;
+                    $gallery_images[] = ['image_url' => $image_url, 'caption' => ''];
+                }
+            }
+        } else {
+            $images = is_array($data['images'] ?? null) ? $data['images'] : [];
+            foreach ($images as $image) {
+                $image_url = trim((string) $image);
+                if ($image_url === '') continue;
+                $gallery_images[] = ['image_url' => $image_url, 'caption' => ''];
+            }
+        }
+
+        $stmt = $pdo->prepare('INSERT INTO portfolio_project_images (project_id, image_url, alt_text, display_order) VALUES (?, ?, ?, ?)');
+        foreach ($gallery_images as $index => $image) {
+            $stmt->execute([$id, $image['image_url'], $image['caption'], $index + 1]);
         }
     }
 
