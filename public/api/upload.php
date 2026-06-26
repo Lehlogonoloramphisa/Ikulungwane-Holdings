@@ -111,9 +111,9 @@ try {
     }
 
     $extension = extension_from_name($file['name'] ?? '');
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'ico', 'mp4', 'mov', 'webm', 'pdf'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'ico', 'mp4', 'mov', 'webm', 'pdf', 'doc', 'docx'];
     if (!in_array($extension, $allowed_extensions, true)) {
-        upload_json(422, ['error' => 'Only supported image, video, and PDF files are allowed.']);
+        upload_json(422, ['error' => 'Only supported image, video, and document files are allowed.']);
     }
 
     $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : null;
@@ -134,11 +134,15 @@ try {
         'video/quicktime',
         'video/webm',
         'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/zip',
+        'application/octet-stream',
         'text/plain',
     ];
 
     if (!in_array($mime, $allowed_mimes, true) || ($mime === 'text/plain' && $extension !== 'svg')) {
-        upload_json(422, ['error' => 'The selected file is not a supported image.']);
+        upload_json(422, ['error' => 'The selected file is not a supported image, video, or document.']);
     }
 
     ensure_upload_dir();
@@ -148,7 +152,7 @@ try {
     $target = IKU_UPLOAD_DIR . '/' . $filename;
 
     if (!move_uploaded_file($file['tmp_name'], $target)) {
-        upload_json(500, ['error' => 'Could not save the uploaded image.']);
+        upload_json(500, ['error' => 'Could not save the uploaded file.']);
     }
 
     @chmod($target, 0644);

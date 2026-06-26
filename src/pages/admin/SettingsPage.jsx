@@ -4,13 +4,18 @@ import {
   Building2,
   CalendarCheck,
   Check,
+  Eye,
+  EyeOff,
   ExternalLink,
+  FileText,
   LayoutTemplate,
+  Link2,
   Mail,
   Navigation,
   Palette,
   Phone,
   Plus,
+  Pencil,
   Save,
   Search,
   Send,
@@ -18,17 +23,30 @@ import {
   ShieldCheck,
   Trash2,
   Type,
+  Upload,
   Wand2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminMediaField from "@/components/admin/AdminMediaField";
+import { localApi } from "@/api/localClient";
 import { cmsDefaults } from "@/data/cmsDefaults";
 import { applyBrandingVariables } from "@/lib/branding";
 import { deepMerge, getValueByPath, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
 import { emailLinesToList, listToEmailLines, sendSiteEmail } from "@/lib/emailNotifications";
+import {
+  defaultLegalDocuments,
+  deleteLegalDocument,
+  emptyLegalDocument,
+  legalPath,
+  listLegalDocuments,
+  normalizeLegalSlug,
+  saveLegalDocument,
+} from "@/lib/legalDocuments";
+import { normalizeDocumentUrl } from "@/lib/media";
 
 const SETTINGS_NAV = [
   { key: "identity", label: "Identity", icon: Building2 },
@@ -115,6 +133,107 @@ function ToggleRow({ label, checked, onChange, help }) {
   );
 }
 
+function AdminDocumentField({ label, value, documentName, onChange, onNameChange, help }) {
+  const inputId = React.useId();
+  const [externalUrl, setExternalUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const previewUrl = normalizeDocumentUrl(value);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    setError("");
+
+    try {
+      const result = await localApi.integrations.Core.UploadFile({ file });
+      onChange(result.file_url || "");
+      if (result.original_filename) {
+        onNameChange?.(result.original_filename);
+      }
+    } catch (err) {
+      setError(err.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleUseUrl = () => {
+    const url = externalUrl.trim();
+    if (!url) return;
+    onChange(url);
+    setExternalUrl("");
+    setError("");
+  };
+
+  return (
+    <div className="admin-media-field admin-document-field">
+      <div className="admin-media-head">
+        <div>
+          <Label htmlFor={inputId}>{label}</Label>
+          <p>Recommended: PDF, exported clearly and kept under 30MB.</p>
+          {help && <span>{help}</span>}
+        </div>
+        <FileText className="h-5 w-5" />
+      </div>
+
+      <div className="admin-document-preview">
+        <FileText className="h-8 w-8" />
+        <div>
+          <strong>{documentName || "No document selected"}</strong>
+          <span>{previewUrl || "Upload a PDF or paste a public Google Drive PDF link."}</span>
+        </div>
+      </div>
+
+      <div className="admin-media-actions">
+        <label htmlFor={inputId}>
+          <Upload className="h-4 w-4" />
+          {uploading ? "Uploading..." : value ? "Replace document" : "Upload document"}
+        </label>
+        {value && (
+          <>
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4" />
+              View
+            </a>
+            <button type="button" onClick={() => onChange("")}>
+              <Trash2 className="h-4 w-4" />
+              Remove
+            </button>
+          </>
+        )}
+      </div>
+
+      <input
+        id={inputId}
+        type="file"
+        accept=".pdf,application/pdf"
+        onChange={(event) => {
+          handleFile(event.target.files?.[0]);
+          event.target.value = "";
+        }}
+      />
+
+      <div className="admin-media-url-row">
+        <Input
+          value={externalUrl}
+          onChange={(event) => setExternalUrl(event.target.value)}
+          placeholder="Paste PDF URL or Google Drive PDF share link"
+        />
+        <button type="button" onClick={handleUseUrl}>
+          <Link2 className="h-4 w-4" />
+          Use Link
+        </button>
+      </div>
+
+      <p className="admin-media-note">
+        For Google Drive, set sharing to anyone with the link so visitors can open the document.
+      </p>
+      {error && <p className="admin-media-error">{error}</p>}
+    </div>
+  );
+}
+
 function SettingsSection({ title, description, children }) {
   return (
     <section className="admin-settings-section">
@@ -130,13 +249,22 @@ function SettingsSection({ title, description, children }) {
   );
 }
 
-export default function SettingsPage() {
+export default function SettingsPage({ initialTab = "identity" }) {
   const override = useCmsOverride();
-  const [active, setActive] = useState("identity");
+  const [active, setActive] = useState(initialTab);
   const [saved, setSaved] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTest, setEmailTest] = useState(null);
   const [content, setContent] = useState(() => deepMerge(cmsDefaults, override));
+  const [legalDocuments, setLegalDocuments] = useState(defaultLegalDocuments);
+  const [legalLoading, setLegalLoading] = useState(true);
+  const [legalSaving, setLegalSaving] = useState(false);
+  const [legalEditing, setLegalEditing] = useState(null);
+  const isLegalRoute = initialTab === "legal";
+
+  useEffect(() => {
+    setActive(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     setContent(deepMerge(cmsDefaults, override));
@@ -145,6 +273,19 @@ export default function SettingsPage() {
   useEffect(() => {
     applyBrandingVariables(content.global.branding);
   }, [content.global.branding]);
+
+  const loadLegalDocuments = async () => {
+    setLegalLoading(true);
+    try {
+      setLegalDocuments(await listLegalDocuments());
+    } finally {
+      setLegalLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadLegalDocuments();
+  }, []);
 
   const get = (path, fallback = "") => getValueByPath(content, path) ?? fallback;
 
@@ -217,20 +358,73 @@ export default function SettingsPage() {
     window.setTimeout(() => setSaved(false), 1800);
   };
 
+  const handleNewLegalDocument = () => {
+    setLegalEditing({
+      ...emptyLegalDocument(legalDocuments.length + 1),
+      slug: `legal-document-${legalDocuments.length + 1}`,
+    });
+  };
+
+  const handleManageLegalDocument = (document) => {
+    setLegalEditing({ ...document });
+  };
+
+  const handleLegalField = (field, value) => {
+    setLegalEditing((current) => {
+      const next = { ...current, [field]: value };
+      if (field === "title" && !current.footer_label) {
+        next.footer_label = value;
+      }
+      if (field === "slug") {
+        next.slug = normalizeLegalSlug(value);
+      }
+      return next;
+    });
+  };
+
+  const handleSaveLegalDocument = async () => {
+    if (!legalEditing) return;
+    setLegalSaving(true);
+    try {
+      await saveLegalDocument({
+        ...legalEditing,
+        slug: normalizeLegalSlug(legalEditing.slug || legalEditing.title),
+      });
+      await loadLegalDocuments();
+      setLegalEditing(null);
+    } finally {
+      setLegalSaving(false);
+    }
+  };
+
+  const handleToggleLegalDocument = async (document) => {
+    await saveLegalDocument({ ...document, show_in_footer: !document.show_in_footer });
+    await loadLegalDocuments();
+  };
+
+  const handleDeleteLegalDocument = async (document) => {
+    if (!window.confirm(`Delete ${document.title}? This removes the footer link and legal page content.`)) return;
+    await deleteLegalDocument(document);
+    await loadLegalDocuments();
+  };
+
   const socialLinks = get("global.socialLinks", []);
   const notificationEmailLines = listToEmailLines(get("global.email.notificationEmails", []));
   const navItems = get("global.navigation.menuItems", []);
   const bookingServices = get("pages.booking.services", []);
   const bookingBudgets = get("pages.booking.budgets", []);
-  const legalLinks = get("global.footer.legalLinks", []);
 
   return (
     <div className="admin-settings-page">
       <div className="admin-settings-hero">
         <div>
-          <p className="admin-eyebrow">Site Control</p>
-          <h1>Settings</h1>
-          <span>Manage the business identity, contact channels, booking options, SEO, buttons, legal links, and visual experience.</span>
+          <p className="admin-eyebrow">{isLegalRoute ? "Documents" : "Site Control"}</p>
+          <h1>{isLegalRoute ? "Legal Documents" : "Settings"}</h1>
+          <span>
+            {isLegalRoute
+              ? "Upload Privacy Policy, Terms & Conditions, and Cookie Policy documents directly under Legal."
+              : "Manage the business identity, contact channels, booking options, SEO, buttons, legal links, and visual experience."}
+          </span>
         </div>
         <div className="admin-settings-actions">
           <Link to="/" className="admin-ghost-cta">
@@ -624,40 +818,140 @@ export default function SettingsPage() {
           )}
 
           {active === "legal" && (
-            <SettingsSection title="Legal And Footer Links" description="Manage which legal links appear in the footer.">
-              <div className="admin-repeat-heading">
-                <strong>Footer legal links</strong>
-                <button
-                  type="button"
-                  onClick={() => addArrayItem("global.footer.legalLinks", { label: "New Legal Link", path: "/privacy", enabled: true, order: legalLinks.length + 1 })}
-                >
-                  <Plus className="h-4 w-4" />
-                  Add legal link
-                </button>
-              </div>
-              <div className="admin-row-stack">
-                {legalLinks.map((link, index) => (
-                  <div key={`${link.label}-${index}`} className="admin-repeat-row is-menu-row">
-                    <Switch checked={link.enabled !== false} onCheckedChange={(value) => updateArrayItem("global.footer.legalLinks", index, "enabled", value)} />
-                    <Input value={link.label || ""} onChange={(event) => updateArrayItem("global.footer.legalLinks", index, "label", event.target.value)} placeholder="Label" />
-                    <Input value={link.path || ""} onChange={(event) => updateArrayItem("global.footer.legalLinks", index, "path", event.target.value)} placeholder="/privacy" />
-                    <Input type="number" value={link.order || index + 1} onChange={(event) => updateArrayItem("global.footer.legalLinks", index, "order", Number(event.target.value))} />
-                    <button type="button" onClick={() => removeArrayItem("global.footer.legalLinks", index)} aria-label={`Remove ${link.label || "legal link"}`}>
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+            <>
+              <SettingsSection title="Legal And Footer Links" description="Each footer legal link has its own editable content, slug, footer visibility, optional PDF, and SEO fields.">
+                <div className="admin-repeat-heading">
+                  <div>
+                    <strong>Footer legal links</strong>
+                    <span className="admin-muted-inline">Manage the document behind each legal footer link.</span>
                   </div>
-                ))}
-              </div>
-              <div className="admin-danger-zone">
-                <div>
-                  <strong>Restore default content</strong>
-                  <p>This resets settings and page builder content back to the original Ikulungwane defaults.</p>
+                  <button type="button" onClick={handleNewLegalDocument}>
+                    <Plus className="h-4 w-4" />
+                    Add legal link
+                  </button>
                 </div>
-                <button type="button" onClick={handleRestoreDefaults}>
-                  Restore Defaults
-                </button>
-              </div>
-            </SettingsSection>
+
+                <div className="admin-legal-link-list">
+                  {legalLoading ? (
+                    <div className="admin-empty-state">Loading legal documents...</div>
+                  ) : legalDocuments.length === 0 ? (
+                    <div className="admin-empty-state">No legal documents yet.</div>
+                  ) : (
+                    legalDocuments.map((document) => (
+                      <article key={document.id || document.slug} className="admin-legal-link-row">
+                        <div className="admin-legal-link-main">
+                          <span className="admin-legal-order">{String(document.sort_order || 0).padStart(2, "0")}</span>
+                          <div>
+                            <strong>{document.footer_label || document.title}</strong>
+                            <p>{legalPath(document.slug)}</p>
+                          </div>
+                        </div>
+
+                        <div className="admin-legal-link-meta">
+                          <span className={document.show_in_footer ? "is-visible" : "is-hidden"}>
+                            {document.show_in_footer ? "Shown in footer" : "Hidden from footer"}
+                          </span>
+                          {document.pdf_url && <em>PDF attached</em>}
+                        </div>
+
+                        <div className="admin-legal-row-actions">
+                          <button type="button" onClick={() => handleManageLegalDocument(document)}>
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </button>
+                          <button type="button" onClick={() => handleToggleLegalDocument(document)}>
+                            {document.show_in_footer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {document.show_in_footer ? "Hide" : "Show"}
+                          </button>
+                          <button type="button" onClick={() => handleManageLegalDocument(document)}>
+                            <FileText className="h-4 w-4" />
+                            Manage Document
+                          </button>
+                          <button type="button" onClick={() => handleDeleteLegalDocument(document)} className="is-danger">
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+
+                <div className="admin-danger-zone">
+                  <div>
+                    <strong>Restore default content</strong>
+                    <p>This resets settings and page builder content back to the original Ikulungwane defaults.</p>
+                  </div>
+                  <button type="button" onClick={handleRestoreDefaults}>
+                    Restore Defaults
+                  </button>
+                </div>
+              </SettingsSection>
+
+              <Dialog open={Boolean(legalEditing)} onOpenChange={(open) => !open && setLegalEditing(null)}>
+                <DialogContent className="bg-[#111] border-white/10 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-xl text-white">
+                      {legalEditing?.id ? "Manage Document" : "Add Legal Document"}
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  {legalEditing && (
+                    <div className="admin-dialog-form admin-legal-editor-form">
+                      <div className="admin-form-grid">
+                        <Field label="Title" value={legalEditing.title} onChange={(value) => handleLegalField("title", value)} />
+                        <Field label="Slug" value={legalEditing.slug} onChange={(value) => handleLegalField("slug", value)} help="Use privacy, terms, or cookies for the main public legal pages." />
+                        <Field label="Footer label" value={legalEditing.footer_label} onChange={(value) => handleLegalField("footer_label", value)} />
+                        <Field label="Sort order" type="number" value={legalEditing.sort_order} onChange={(value) => handleLegalField("sort_order", Number(value))} />
+                        <div className="md:col-span-2">
+                          <Field
+                            label="Content editor"
+                            multiline
+                            value={legalEditing.content}
+                            onChange={(value) => handleLegalField("content", value)}
+                            help="Write the legal document content here. Use blank lines to separate paragraphs."
+                          />
+                        </div>
+                      </div>
+
+                      <AdminDocumentField
+                        label="Optional uploaded PDF"
+                        value={legalEditing.pdf_url}
+                        documentName={legalEditing.footer_label || legalEditing.title}
+                        onChange={(fileUrl) => handleLegalField("pdf_url", fileUrl)}
+                        help="Attach a PDF only when you want visitors to download a formal document."
+                      />
+
+                      <div className="admin-form-grid">
+                        <div className="md:col-span-2">
+                          <Field label="SEO title" value={legalEditing.meta_title} onChange={(value) => handleLegalField("meta_title", value)} />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Field label="SEO description" multiline value={legalEditing.meta_description} onChange={(value) => handleLegalField("meta_description", value)} />
+                        </div>
+                      </div>
+
+                      <ToggleRow
+                        label="Show in footer"
+                        checked={Boolean(legalEditing.show_in_footer)}
+                        onChange={(value) => handleLegalField("show_in_footer", value)}
+                        help="When enabled, this document appears in the footer legal links."
+                      />
+
+                      <div className="admin-dialog-actions">
+                        <button type="button" className="admin-secondary-action" onClick={() => setLegalEditing(null)}>
+                          Cancel
+                        </button>
+                        <button type="button" className="admin-primary-action" disabled={legalSaving} onClick={handleSaveLegalDocument}>
+                          <Save className="h-4 w-4" />
+                          {legalSaving ? "Saving..." : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       </div>

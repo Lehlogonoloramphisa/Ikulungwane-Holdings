@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowDown, ArrowUp, Check, Image, Images, Plus, Star, Trash2, Upload, Edit } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Image, Images, Link2, Plus, Star, Trash2, Upload, Edit } from "lucide-react";
 import { localApi } from "@/api/localClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,7 @@ export default function PortfolioManagement() {
   const [imageEditing, setImageEditing] = useState(null);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [galleryLink, setGalleryLink] = useState("");
   const queryClient = useQueryClient();
 
   const { data: projects } = useQuery({
@@ -103,6 +104,7 @@ export default function PortfolioManagement() {
   const handleEdit = (project) => { setEditing({ ...project, gallery_images: normalizeGalleryImages(project) }); setDialogOpen(true); };
   const handleManageImages = (project) => {
     setImageEditing({ ...project, gallery_images: normalizeGalleryImages(project) });
+    setGalleryLink("");
     setImageDialogOpen(true);
   };
 
@@ -160,6 +162,29 @@ export default function PortfolioManagement() {
     } finally {
       setUploadingGallery(false);
     }
+  };
+
+  const handleGalleryLinkAdd = () => {
+    const imageUrl = normalizeMediaUrl(galleryLink);
+    if (!imageUrl) {
+      window.alert("Paste a public image URL or Google Drive share link first.");
+      return;
+    }
+
+    setImageEditing((current) => ({
+      ...current,
+      gallery_images: renumberGallery([
+        ...(current.gallery_images || []),
+        {
+          id: `gallery-link-${Date.now()}`,
+          project_id: current?.id || "",
+          image_url: imageUrl,
+          caption: "",
+          sort_order: (current?.gallery_images?.length || 0) + 1,
+        },
+      ]),
+    }));
+    setGalleryLink("");
   };
 
   return (
@@ -296,19 +321,38 @@ export default function PortfolioManagement() {
                   <p className="admin-eyebrow">Gallery Images</p>
                   <h3>{(imageEditing.gallery_images || []).length} images under this category</h3>
                 </div>
-                <label>
-                  <Upload className="h-4 w-4" />
-                  {uploadingGallery ? "Uploading..." : "Upload More Images"}
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-                    onChange={(event) => {
-                      handleGalleryUpload(event.target.files);
-                      event.target.value = "";
-                    }}
-                  />
-                </label>
+                <div className="portfolio-gallery-toolbar-actions">
+                  <label>
+                    <Upload className="h-4 w-4" />
+                    {uploadingGallery ? "Uploading..." : "Upload More Images"}
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      onChange={(event) => {
+                        handleGalleryUpload(event.target.files);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                  <div className="portfolio-gallery-link-row">
+                    <Input
+                      value={galleryLink}
+                      onChange={(event) => setGalleryLink(event.target.value)}
+                      placeholder="Paste image or Google Drive link"
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          handleGalleryLinkAdd();
+                        }
+                      }}
+                    />
+                    <button type="button" onClick={handleGalleryLinkAdd}>
+                      <Link2 className="h-4 w-4" />
+                      Add Link
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="portfolio-gallery-list">

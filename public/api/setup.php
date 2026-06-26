@@ -362,6 +362,23 @@ function create_tables(PDO $pdo) {
           INDEX email_idx (email)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
+        "CREATE TABLE IF NOT EXISTS legal_documents (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          title VARCHAR(191) NOT NULL,
+          slug VARCHAR(120) UNIQUE NOT NULL,
+          footer_label VARCHAR(191) NOT NULL,
+          content LONGTEXT,
+          pdf_url LONGTEXT,
+          meta_title VARCHAR(191),
+          meta_description TEXT,
+          show_in_footer TINYINT(1) NOT NULL DEFAULT 1,
+          sort_order INT NOT NULL DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX legal_footer_idx (show_in_footer, sort_order),
+          INDEX legal_slug_idx (slug)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
         "CREATE TABLE IF NOT EXISTS site_settings (
           setting_key VARCHAR(100) PRIMARY KEY,
           setting_value LONGTEXT,
@@ -485,6 +502,46 @@ function install_system($payload) {
         foreach (['home', 'portfolio', 'services', 'about', 'journal', 'contact', 'booking'] as $page) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO page_content (page_key, content) VALUES (?, '{}')");
             $stmt->execute([$page]);
+        }
+
+        $legal_documents = [
+            [
+                'Privacy Policy',
+                'privacy',
+                'Privacy Policy',
+                "We collect the information you share through contact, booking, and enquiry forms so we can respond to your request and deliver creative services.\n\nLocally entered admin and form data is stored in your browser for this standalone React version. Production deployments should connect these forms to your chosen secure backend or CRM.\n\nWe do not sell personal information. Contact us if you need a stored enquiry corrected or removed.",
+                '',
+                'Privacy Policy | ' . $site_name,
+                'How ' . $site_name . ' handles website enquiries, bookings, and personal information.',
+                1,
+                1,
+            ],
+            [
+                'Terms & Conditions',
+                'terms',
+                'Terms & Conditions',
+                "Project timelines, deposits, deliverables, usage rights, and cancellation terms should be confirmed in writing before production begins.\n\nAll creative work remains subject to the agreed quotation or service agreement. Website content is provided for general information and can be updated without notice.\n\nFor formal project terms, request a written quote from Ikulungwane Holdings.",
+                '',
+                'Terms & Conditions | ' . $site_name,
+                'Project terms, bookings, deliverables, and service information for ' . $site_name . '.',
+                1,
+                2,
+            ],
+            [
+                'Cookie Policy',
+                'cookies',
+                'Cookie Policy',
+                "This standalone React version uses browser storage to keep local submissions, demo admin data, and local authentication state.\n\nIf analytics, marketing pixels, or embedded third-party tools are added later, this policy should be updated to describe those services.\n\nYou can clear local site data from your browser settings at any time.",
+                '',
+                'Cookie Policy | ' . $site_name,
+                'Cookie and browser storage information for the ' . $site_name . ' website.',
+                1,
+                3,
+            ],
+        ];
+        $stmt = $pdo->prepare("INSERT IGNORE INTO legal_documents (title, slug, footer_label, content, pdf_url, meta_title, meta_description, show_in_footer, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        foreach ($legal_documents as $document) {
+            $stmt->execute($document);
         }
 
         upsert_system_setting($pdo, 'site_name', $site_name);

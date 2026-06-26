@@ -472,6 +472,31 @@ CREATE INDEX IF NOT EXISTS email_delivery_logs_source_idx
 CREATE INDEX IF NOT EXISTS email_delivery_logs_status_idx
   ON email_delivery_logs (status, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS legal_documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  slug text UNIQUE NOT NULL,
+  footer_label text NOT NULL,
+  content text,
+  pdf_url text,
+  meta_title text,
+  meta_description text,
+  show_in_footer boolean NOT NULL DEFAULT true,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT legal_documents_slug_not_blank CHECK (length(trim(slug)) > 0)
+);
+
+CREATE INDEX IF NOT EXISTS legal_documents_footer_idx
+  ON legal_documents (show_in_footer, sort_order);
+
+DROP TRIGGER IF EXISTS legal_documents_set_updated_at ON legal_documents;
+CREATE TRIGGER legal_documents_set_updated_at
+BEFORE UPDATE ON legal_documents
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 CREATE TABLE IF NOT EXISTS site_settings (
   setting_key text PRIMARY KEY,
   value jsonb NOT NULL DEFAULT '{}'::jsonb,

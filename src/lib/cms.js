@@ -1,7 +1,8 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { cmsDefaults } from "@/data/cmsDefaults";
 
 const CMS_KEY = "ikulungwane_cms_content";
+const CONTENT_ENDPOINT = "/api/content.php";
 const LEGACY_DEFAULT_ACCENT = "#ff9800";
 const DEFAULT_ACCENT = "#e11d2e";
 const TYPOGRAPHY_LIMITS = {
@@ -14,6 +15,10 @@ const TYPOGRAPHY_LIMITS = {
 };
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
+
+let backendOverride = {};
+let backendLoaded = false;
+let backendLoading = null;
 
 const isPlainObject = (value) =>
   value && typeof value === "object" && !Array.isArray(value);
@@ -54,14 +59,10 @@ const clampStoredNumber = (value, min, max) => {
   return Math.min(max, Math.max(min, number));
 };
 
-export const readCmsOverride = () => {
-  const storage = getStorage();
-  if (!storage) return {};
-
+const normalizeOverride = (override) => {
   try {
-    const raw = storage.getItem(CMS_KEY);
-    const override = raw ? JSON.parse(raw) : {};
-    const branding = override?.global?.branding;
+    const output = isPlainObject(override) ? clone(override) : {};
+    const branding = output?.global?.branding;
 
     if (branding) {
       if (branding.primaryColor === LEGACY_DEFAULT_ACCENT) {
@@ -79,26 +80,97 @@ export const readCmsOverride = () => {
       }
     }
 
-    return override;
+    return output;
   } catch {
     return {};
   }
 };
 
+const readLocalCmsOverride = () => {
+  const storage = getStorage();
+  if (!storage) return {};
+
+  try {
+    const raw = storage.getItem(CMS_KEY);
+    return normalizeOverride(raw ? JSON.parse(raw) : {});
+  } catch {
+    return {};
+  }
+};
+
+const dispatchCmsUpdate = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("ikulungwane:cms-updated"));
+  }
+};
+
+const saveCmsContentToBackend = async (content) => {
+  const response = await fetch(`${CONTENT_ENDPOINT}?action=saveSettings`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not save settings to the backend.");
+  }
+
+  backendOverride = normalizeOverride(content);
+  backendLoaded = true;
+  dispatchCmsUpdate();
+};
+
+export const refreshCmsContent = async ({ force = false } = {}) => {
+  if (backendLoaded && !force) return backendOverride;
+  if (backendLoading) return backendLoading;
+
+  backendLoading = fetch(`${CONTENT_ENDPOINT}?action=getSettings`, {
+    credentials: "include",
+  })
+    .then(async (response) => {
+      const text = await response.text();
+      if (!response.ok || !text) return {};
+
+      const data = JSON.parse(text);
+      backendOverride = normalizeOverride(data.content || {});
+      backendLoaded = true;
+      dispatchCmsUpdate();
+      return backendOverride;
+    })
+    .catch(() => ({}))
+    .finally(() => {
+      backendLoading = null;
+    });
+
+  return backendLoading;
+};
+
+export const readCmsOverride = () => deepMerge(backendOverride, readLocalCmsOverride());
+
 export const getCmsContent = () => deepMerge(cmsDefaults, readCmsOverride());
 
 export const saveCmsContent = (content) => {
   const storage = getStorage();
-  if (!storage) return;
-  storage.setItem(CMS_KEY, JSON.stringify(content));
-  window.dispatchEvent(new CustomEvent("ikulungwane:cms-updated"));
+  if (storage) {
+    try {
+      storage.setItem(CMS_KEY, JSON.stringify(content));
+    } catch {
+      // Backend persistence still runs below. This can happen if local uploads
+      // create very large data URLs during local development.
+    }
+  }
+  dispatchCmsUpdate();
+  saveCmsContentToBackend(content).catch(() => {});
 };
 
 export const resetCmsContent = () => {
   const storage = getStorage();
-  if (!storage) return;
-  storage.removeItem(CMS_KEY);
-  window.dispatchEvent(new CustomEvent("ikulungwane:cms-updated"));
+  storage?.removeItem(CMS_KEY);
+  backendOverride = {};
+  backendLoaded = false;
+  dispatchCmsUpdate();
+  saveCmsContentToBackend(cmsDefaults).catch(() => {});
 };
 
 const subscribe = (callback) => {
@@ -111,17 +183,28 @@ const subscribe = (callback) => {
   };
 };
 
-const getSnapshot = () => JSON.stringify(readCmsOverride());
+const getSnapshot = () => JSON.stringify({
+  backend: backendOverride,
+  local: readLocalCmsOverride(),
+});
 const getServerSnapshot = () => "{}";
 
 export const useCms = () => {
+  useEffect(() => {
+    refreshCmsContent();
+  }, []);
+
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  return useMemo(() => deepMerge(cmsDefaults, JSON.parse(snapshot || "{}")), [snapshot]);
+  return useMemo(() => deepMerge(cmsDefaults, readCmsOverride()), [snapshot]);
 };
 
 export const useCmsOverride = () => {
+  useEffect(() => {
+    refreshCmsContent();
+  }, []);
+
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  return useMemo(() => JSON.parse(snapshot || "{}"), [snapshot]);
+  return useMemo(() => readCmsOverride(), [snapshot]);
 };
 
 export const orderedEnabled = (items = []) =>

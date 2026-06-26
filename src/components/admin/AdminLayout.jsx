@@ -39,6 +39,7 @@ const NAV_GROUPS = [
   {
     label: "System",
     items: [
+      { path: "/admin/legal", icon: ShieldCheck, label: "Legal" },
       { path: "/admin/settings", icon: Settings, label: "Settings" },
     ],
   },

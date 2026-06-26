@@ -349,6 +349,41 @@ export const cmsDefaults = {
         { name: "notes", label: "Tell us about the mood, must-have moments, inspiration, deliverables, or any special requests", required: false, enabled: true },
       ],
     },
+    legal: {
+      privacy: {
+        title: "Privacy Policy",
+        subtitle: "Your Information",
+        body: [
+          "We collect the information you share through contact, booking, and enquiry forms so we can respond to your request and deliver creative services.",
+          "Locally entered admin and form data is stored in your browser for this standalone React version. Production deployments should connect these forms to your chosen secure backend or CRM.",
+          "We do not sell personal information. Contact us if you need a stored enquiry corrected or removed.",
+        ],
+        documentUrl: "",
+        documentName: "Privacy Policy",
+      },
+      terms: {
+        title: "Terms & Conditions",
+        subtitle: "Working Together",
+        body: [
+          "Project timelines, deposits, deliverables, usage rights, and cancellation terms should be confirmed in writing before production begins.",
+          "All creative work remains subject to the agreed quotation or service agreement. Website content is provided for general information and can be updated without notice.",
+          "For formal project terms, request a written quote from Ikulungwane Holdings.",
+        ],
+        documentUrl: "",
+        documentName: "Terms & Conditions",
+      },
+      cookies: {
+        title: "Cookie Policy",
+        subtitle: "Site Data",
+        body: [
+          "This standalone React version uses browser storage to keep local submissions, demo admin data, and local authentication state.",
+          "If analytics, marketing pixels, or embedded third-party tools are added later, this policy should be updated to describe those services.",
+          "You can clear local site data from your browser settings at any time.",
+        ],
+        documentUrl: "",
+        documentName: "Cookie Policy",
+      },
+    },
   },
   mediaLibrary: {
     categories: ["Hero", "Portfolio", "Services", "Team", "Journal", "Documents"],

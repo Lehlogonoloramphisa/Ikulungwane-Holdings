@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
 import { orderedEnabled, useCms } from "@/lib/cms";
+import { legalPath, useLegalDocuments } from "@/lib/legalDocuments";
 import { normalizeMediaUrl } from "@/lib/media";
 
 export default function Footer() {
@@ -11,7 +12,7 @@ export default function Footer() {
   const contact = cms.global.contact;
   const socials = cms.global.socialLinks.filter((item) => item.enabled !== false && item.url);
   const quickLinks = orderedEnabled(footer.links);
-  const legalLinks = orderedEnabled(footer.legalLinks);
+  const { documents: legalLinks } = useLegalDocuments({ footerOnly: true });
   const logoImage = normalizeMediaUrl(footer.logoImage);
 
   return (
@@ -99,7 +100,7 @@ export default function Footer() {
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-xs text-white/30">
             {legalLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="transition-colors hover:text-white/60">{link.label}</Link>
+              <Link key={link.id || link.slug} to={legalPath(link.slug)} className="transition-colors hover:text-white/60">{link.footer_label || link.title}</Link>
             ))}
           </div>
         </div>

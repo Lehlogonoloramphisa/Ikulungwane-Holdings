@@ -123,6 +123,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/testimonials" element={<TestimonialsManagement />} />
         <Route path="/admin/blog" element={<BlogManagement />} />
         <Route path="/admin/team" element={<TeamManagement />} />
+        <Route path="/admin/legal" element={<SettingsPage initialTab="legal" />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
       </Route>
 

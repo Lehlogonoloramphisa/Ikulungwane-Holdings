@@ -638,10 +638,58 @@ function delete_entity(PDO $pdo, $entity, $config, $body, $admin) {
     content_json(200, ['success' => true]);
 }
 
+function decoded_settings_value($value) {
+    if ($value === null || $value === '') return [];
+    $decoded = json_decode($value, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function get_site_settings(PDO $pdo) {
+    $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('cms_content', 'global') ORDER BY FIELD(setting_key, 'cms_content', 'global') LIMIT 1");
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        content_json(200, ['content' => []]);
+    }
+
+    $decoded = decoded_settings_value($row['setting_value'] ?? '');
+    if (($row['setting_key'] ?? '') === 'global') {
+        content_json(200, ['content' => ['global' => $decoded]]);
+    }
+
+    content_json(200, ['content' => $decoded]);
+}
+
+function save_site_settings(PDO $pdo, $body, $admin) {
+    require_admin($admin ? ['role' => 'admin'] : null);
+    $content = $body['content'] ?? null;
+    if (!is_array($content)) {
+        content_json(422, ['error' => 'Settings content is required.']);
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO site_settings (setting_key, setting_value, description) VALUES ('cms_content', ?, 'Website settings and page builder content') ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), description = VALUES(description)");
+    $stmt->execute([json_encode($content)]);
+    content_json(200, ['success' => true, 'content' => $content]);
+}
+
 $action = $_GET['action'] ?? 'list';
 
 try {
     $body = $_SERVER['REQUEST_METHOD'] === 'POST' ? content_body() : $_GET;
+
+    if ($action === 'getSettings' || $action === 'saveSettings') {
+        $pdo = content_pdo();
+        $user = current_user($pdo);
+        $admin = is_admin($user);
+
+        if ($action === 'getSettings') {
+            get_site_settings($pdo);
+        }
+
+        save_site_settings($pdo, $body, $admin);
+    }
+
     $entity = (string) ($body['entity'] ?? '');
     $config = entity_config($entity);
     if (!$config) {

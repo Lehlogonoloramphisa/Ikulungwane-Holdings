@@ -206,6 +206,23 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   INDEX contact_email_idx (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS legal_documents (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(191) NOT NULL,
+  slug VARCHAR(120) UNIQUE NOT NULL,
+  footer_label VARCHAR(191) NOT NULL,
+  content LONGTEXT,
+  pdf_url LONGTEXT,
+  meta_title VARCHAR(191),
+  meta_description TEXT,
+  show_in_footer TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX legal_footer_idx (show_in_footer, sort_order),
+  INDEX legal_slug_idx (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS site_settings (
   setting_key VARCHAR(100) PRIMARY KEY,
   setting_value LONGTEXT,
