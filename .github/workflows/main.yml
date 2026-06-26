@@ -24,6 +24,11 @@ jobs:
       - name: Build website
         run: npm run build
 
+      - name: Copy API files into dist
+        run: |
+          cp -r public/api dist/api
+          cp public/.htaccess dist/.htaccess || true
+
       - name: Upload to Afrihost
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -32,3 +37,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/
+          dangerous-clean-slate: true
