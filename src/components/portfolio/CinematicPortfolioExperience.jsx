@@ -9,6 +9,7 @@ import { normalizeMediaUrl } from "@/lib/media";
 gsap.registerPlugin(ScrollTrigger);
 
 const WIDTH_CLASSES = ["is-wide", "is-tall", "is-hero", "is-medium", "is-wide", "is-tall"];
+const MOBILE_MEDIA_QUERY = "(max-width: 900px), (hover: none), (pointer: coarse)";
 
 const normalizeProjectImage = (image) => normalizeMediaUrl(typeof image === "string" ? image : image?.image_url);
 
@@ -145,8 +146,8 @@ export default function CinematicPortfolioExperience({
     if (!root || display.length === 0) return undefined;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
-    if (prefersReducedMotion || isMobileViewport) return undefined;
+    const isMobileLikeViewport = window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+    if (prefersReducedMotion || isMobileLikeViewport) return undefined;
 
     const images = Array.from(root.querySelectorAll("img"));
     const refresh = () => ScrollTrigger.refresh();

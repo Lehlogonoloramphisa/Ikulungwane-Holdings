@@ -9222,8 +9222,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 }
 
-/* Mobile image visibility guard: keep every real image present on small screens. */
-@media (max-width: 768px) {
+/* Mobile image visibility guard: keep every real image present on small screens, touch devices, and mobile landscape. */
+@media (max-width: 900px), (hover: none), (pointer: coarse) {
   .cinema-transition-image,
   .cinema-reveal-image,
   .cinema-horizontal-image,
@@ -9274,11 +9274,19 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-project-panel.is-hero,
   .cinema-project-panel.is-medium {
     width: 100%;
-    height: auto;
-    min-height: 0;
+    height: 460px;
+    height: clamp(320px, 72vh, 560px);
+    min-height: 320px;
     aspect-ratio: 4 / 5;
     flex-basis: auto;
     transform: none !important;
+  }
+
+  .cinema-transition-frame,
+  .cinema-intro-image {
+    height: 480px;
+    height: clamp(340px, 70vh, 620px);
+    min-height: 340px;
   }
 
   .cinema-sticky-showcase {
@@ -9295,7 +9303,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
     position: relative;
     top: auto;
     width: 100%;
-    height: auto;
+    height: 440px;
+    height: clamp(320px, 68vh, 560px);
+    min-height: 320px;
     aspect-ratio: 4 / 5;
     transform: none !important;
   }
@@ -9312,6 +9322,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-sticky-item-image {
     display: block;
     width: 100%;
+    height: 440px;
+    height: clamp(320px, 68vh, 560px);
+    min-height: 320px;
     aspect-ratio: 4 / 5;
     margin: 0 0 22px;
     object-fit: cover;
