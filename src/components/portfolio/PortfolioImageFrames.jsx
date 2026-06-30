@@ -27,8 +27,8 @@ export const projectImageTokens = {
   },
   springDefault: {
     type: "spring",
-    duration: 0.4,
-    bounce: 0.2,
+    duration: 0.9,
+    bounce: 0,
   },
   springGallery: {
     type: "spring",
@@ -41,7 +41,7 @@ const imageList = (images = []) => images.filter(Boolean);
 
 export function ImageLoopCard({
   images,
-  interval = 1400,
+  interval = 3800,
   alt = "",
   className = "",
 }) {

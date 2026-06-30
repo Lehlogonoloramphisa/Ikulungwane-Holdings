@@ -110,6 +110,21 @@ export default function CinematicPortfolioExperience({
     });
   }, []);
 
+  const stopLayerEvent = useCallback((event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+  }, []);
+
+  const closeCaseStudyLayer = useCallback((event) => {
+    stopLayerEvent(event);
+    closeCaseStudy();
+  }, [closeCaseStudy, stopLayerEvent]);
+
+  const closeCaseImageLayer = useCallback((event) => {
+    stopLayerEvent(event);
+    setActiveCaseImageIndex(null);
+  }, [stopLayerEvent]);
+
   const activeCaseImage =
     caseStudy && activeCaseImageIndex !== null
       ? caseStudy.project.gallery_images?.[activeCaseImageIndex]
@@ -580,7 +595,15 @@ export default function CinematicPortfolioExperience({
             <img src={caseStudy.project.cover_image} alt={caseStudy.project.title} />
             <span>View Fullscreen</span>
           </button>
-          <button type="button" className="cinema-case-close" onClick={closeCaseStudy} aria-label="Close project">
+          <button
+            type="button"
+            className="cinema-case-close"
+            onClickCapture={closeCaseStudyLayer}
+            onPointerDownCapture={closeCaseStudyLayer}
+            onPointerDown={closeCaseStudyLayer}
+            onClick={closeCaseStudyLayer}
+            aria-label="Close project"
+          >
             <X />
           </button>
           <div className="cinema-case-content">
@@ -607,11 +630,20 @@ export default function CinematicPortfolioExperience({
           </div>
 
           {activeCaseImage && (
-            <div className="portfolio-image-lightbox" role="dialog" aria-modal="true" aria-label="Fullscreen selected work image">
+            <div
+              className="portfolio-image-lightbox"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Fullscreen selected work image"
+              onClick={closeCaseImageLayer}
+            >
               <button
                 type="button"
                 className="portfolio-image-lightbox-close"
-                onClick={() => setActiveCaseImageIndex(null)}
+                onClickCapture={closeCaseImageLayer}
+                onPointerDownCapture={closeCaseImageLayer}
+                onPointerDown={closeCaseImageLayer}
+                onClick={closeCaseImageLayer}
                 aria-label="Close fullscreen image"
               >
                 <X />
@@ -619,7 +651,10 @@ export default function CinematicPortfolioExperience({
               <button
                 type="button"
                 className="portfolio-image-lightbox-nav is-prev"
-                onClick={() => moveCaseImage(-1)}
+                onClick={(event) => {
+                  stopLayerEvent(event);
+                  moveCaseImage(-1);
+                }}
                 aria-label="Previous image"
               >
                 <ArrowLeft />
@@ -631,12 +666,19 @@ export default function CinematicPortfolioExperience({
               <button
                 type="button"
                 className="portfolio-image-lightbox-nav is-next"
-                onClick={() => moveCaseImage(1)}
+                onClick={(event) => {
+                  stopLayerEvent(event);
+                  moveCaseImage(1);
+                }}
                 aria-label="Next image"
               >
                 <ArrowRight />
               </button>
               <div className="portfolio-image-lightbox-caption">
+                <button type="button" className="portfolio-image-lightbox-exit" onClick={closeCaseImageLayer}>
+                  <ArrowLeft />
+                  Back to gallery
+                </button>
                 <p>{caseStudy.project.title}</p>
                 <span>{activeCaseImage.caption || categoryLabel(caseStudy.project.category)}</span>
               </div>

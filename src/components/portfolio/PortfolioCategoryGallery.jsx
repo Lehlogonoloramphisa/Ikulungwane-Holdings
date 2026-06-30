@@ -120,6 +120,21 @@ export default function PortfolioCategoryGallery({
     setSelectedIndex(null);
   };
 
+  const stopLayerEvent = (event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+  };
+
+  const closeGalleryLayer = (event) => {
+    stopLayerEvent(event);
+    closeGallery();
+  };
+
+  const closeImageLayer = (event) => {
+    stopLayerEvent(event);
+    setActiveImageIndex(null);
+  };
+
   const moveProject = (direction) => {
     setActiveImageIndex(null);
     setSelectedIndex((current) => {
@@ -275,7 +290,7 @@ export default function PortfolioCategoryGallery({
               <ImageLoopCard
                 images={project.image_urls}
                 alt={project.title}
-                interval={1200 + (index % 4) * 240}
+                interval={4200 + (index % 4) * 520}
               />
               <span className="portfolio-category-card-title">
                 <em>{categoryLabel(project.category)}</em>
@@ -307,7 +322,15 @@ export default function PortfolioCategoryGallery({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <button type="button" className="portfolio-gallery-close" onClick={closeGallery} aria-label="Close gallery">
+            <button
+              type="button"
+              className="portfolio-gallery-close"
+              onClickCapture={closeGalleryLayer}
+              onPointerDownCapture={closeGalleryLayer}
+              onPointerDown={closeGalleryLayer}
+              onClick={closeGalleryLayer}
+              aria-label="Close gallery"
+            >
               <X />
             </button>
 
@@ -370,11 +393,15 @@ export default function PortfolioCategoryGallery({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  onClick={closeImageLayer}
                 >
                   <button
                     type="button"
                     className="portfolio-image-lightbox-close"
-                    onClick={() => setActiveImageIndex(null)}
+                    onClickCapture={closeImageLayer}
+                    onPointerDownCapture={closeImageLayer}
+                    onPointerDown={closeImageLayer}
+                    onClick={closeImageLayer}
                     aria-label="Close fullscreen image"
                   >
                     <X />
@@ -383,7 +410,10 @@ export default function PortfolioCategoryGallery({
                   <button
                     type="button"
                     className="portfolio-image-lightbox-nav is-prev"
-                    onClick={() => moveImage(-1)}
+                    onClick={(event) => {
+                      stopLayerEvent(event);
+                      moveImage(-1);
+                    }}
                     aria-label="Previous image"
                   >
                     <ArrowLeft />
@@ -394,13 +424,20 @@ export default function PortfolioCategoryGallery({
                   <button
                     type="button"
                     className="portfolio-image-lightbox-nav is-next"
-                    onClick={() => moveImage(1)}
+                    onClick={(event) => {
+                      stopLayerEvent(event);
+                      moveImage(1);
+                    }}
                     aria-label="Next image"
                   >
                     <ArrowRight />
                   </button>
 
                   <div className="portfolio-image-lightbox-caption">
+                    <button type="button" className="portfolio-image-lightbox-exit" onClick={closeImageLayer}>
+                      <ArrowLeft />
+                      Back to gallery
+                    </button>
                     <p>{String(activeImageIndex + 1).padStart(2, "0")} / {String(selectedProject.gallery_images.length).padStart(2, "0")}</p>
                     <span>{activeImage.caption && activeImage.caption !== "Cover image" ? activeImage.caption : selectedProject.title}</span>
                   </div>

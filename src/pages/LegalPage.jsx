@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ArrowLeft, Download } from "lucide-react";
 import PageHero from "@/components/shared/PageHero";
+import SmartBackButton from "@/components/shared/SmartBackButton";
 import { useLegalDocument } from "@/lib/legalDocuments";
 import { documentDownloadUrl } from "@/lib/media";
 
@@ -57,10 +58,10 @@ export default function LegalPage({ page: pageProp }) {
       <PageHero title={title} subtitle={legalDocument?.footer_label || "Legal"} />
       <section className="ashley-white-section legal-page-section py-16 md:py-24">
         <div className="legal-page-shell relative mx-auto px-6">
-          <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-white/60 transition-colors hover:text-white">
+          <SmartBackButton fallback="/" className="mb-10 inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-sm uppercase tracking-[0.12em] text-white/60 transition-colors hover:text-white">
             <ArrowLeft className="h-4 w-4" />
-            Back Home
-          </Link>
+            Back
+          </SmartBackButton>
 
           <article className="legal-readable-document">
             <div className="legal-readable-head">

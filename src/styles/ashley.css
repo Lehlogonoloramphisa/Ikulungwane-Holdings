@@ -1329,7 +1329,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   position: fixed;
   right: 28px;
   top: 28px;
-  z-index: 3;
+  z-index: 9993;
   display: grid;
   width: 48px;
   height: 48px;
@@ -1338,6 +1338,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   background: rgba(0, 0, 0, 0.42);
   color: white;
   cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
   transition: border-color 220ms ease, color 220ms ease;
 }
 
@@ -1980,7 +1982,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   position: fixed;
   right: 24px;
   top: 24px;
-  z-index: 3;
+  z-index: 9993;
   display: grid;
   width: 48px;
   height: 48px;
@@ -1989,6 +1991,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.58);
   color: white;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .portfolio-gallery-panel {
@@ -2226,7 +2231,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .portfolio-image-lightbox {
   position: fixed;
   inset: 0;
-  z-index: 170;
+  z-index: 10000;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -2237,22 +2242,29 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .portfolio-image-lightbox img {
+  position: relative;
+  z-index: 1;
   width: 100vw;
   height: 100vh;
   padding: clamp(18px, 4vw, 54px);
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .portfolio-image-lightbox-close,
 .portfolio-image-lightbox-nav {
   position: fixed;
-  z-index: 2;
+  z-index: 10002;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.52);
   color: white;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
   backdrop-filter: blur(14px);
   transition: border-color 220ms ease, color 220ms ease, transform 220ms ease;
 }
@@ -2260,8 +2272,15 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .portfolio-image-lightbox-close {
   right: 24px;
   top: 24px;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.68);
+  color: white;
+}
+
+.portfolio-image-lightbox-close svg {
+  width: 18px;
+  height: 18px;
 }
 
 .portfolio-image-lightbox-nav {
@@ -2285,11 +2304,17 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   color: var(--ashley-accent);
 }
 
+.portfolio-image-lightbox-close:hover {
+  border-color: var(--ashley-accent);
+  background: rgba(0, 0, 0, 0.78);
+  color: var(--ashley-accent);
+}
+
 .portfolio-image-lightbox-caption {
   position: fixed;
   left: 50%;
   bottom: 24px;
-  z-index: 2;
+  z-index: 10001;
   width: min(720px, calc(100vw - 36px));
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
@@ -2298,6 +2323,40 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   text-align: center;
   transform: translateX(-50%);
   backdrop-filter: blur(16px);
+}
+
+.portfolio-image-lightbox-exit {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(225, 29, 46, 0.34);
+  border-radius: 999px;
+  background: rgba(225, 29, 46, 0.12);
+  padding: 0 12px;
+  color: white;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: border-color 220ms ease, background 220ms ease, color 220ms ease;
+}
+
+.portfolio-image-lightbox-exit svg {
+  width: 14px;
+  height: 14px;
+  color: var(--ashley-accent);
+}
+
+.portfolio-image-lightbox-exit:hover {
+  border-color: var(--ashley-accent);
+  background: rgba(225, 29, 46, 0.2);
+  color: var(--ashley-accent);
 }
 
 .portfolio-image-lightbox-caption p {
@@ -2693,7 +2752,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
     right: 14px;
     top: 14px;
     width: 44px;
+    min-width: 44px;
     height: 44px;
+    padding: 0;
   }
 
   .portfolio-image-lightbox-nav {
@@ -2715,6 +2776,10 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .portfolio-image-lightbox-caption {
     bottom: 86px;
     border-radius: 8px;
+  }
+
+  .portfolio-image-lightbox-exit {
+    width: 100%;
   }
 
   .portfolio-gallery-main > span,
@@ -5108,7 +5173,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .booking-actions button,
-.booking-success-card a {
+.booking-success-card a,
+.booking-success-card .booking-success-actions button {
   display: inline-flex;
   min-height: 52px;
   align-items: center;
@@ -5127,14 +5193,16 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .booking-actions button.is-primary,
-.booking-success-card a {
+.booking-success-card a,
+.booking-success-card .booking-success-actions button {
   border-color: var(--ashley-accent);
   background: var(--ashley-accent);
   color: #050505;
 }
 
 .booking-actions button:hover,
-.booking-success-card a:hover {
+.booking-success-card a:hover,
+.booking-success-card .booking-success-actions button:hover {
   transform: translateY(-2px);
 }
 
@@ -5145,7 +5213,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .booking-actions svg,
-.booking-success-card a svg {
+.booking-success-card a svg,
+.booking-success-card .booking-success-actions button svg {
   width: 16px;
   height: 16px;
 }

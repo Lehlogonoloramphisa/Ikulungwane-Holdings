@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Calendar, Camera, CheckCircle, FileText, Wallet } from "lucide-react";
 import { localApi } from "@/api/localClient";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SmartBackButton from "@/components/shared/SmartBackButton";
 import { orderedEnabled, useCms } from "@/lib/cms";
 import { sendSiteEmail } from "@/lib/emailNotifications";
 
@@ -94,9 +94,9 @@ export default function Booking() {
               {page.depositAmount ? <> Deposit guidance: <strong>{page.depositAmount}</strong>.</> : null}
             </span>
             <div className="booking-success-actions">
-              <Link to="/">
-                Back to Home <ArrowRight />
-              </Link>
+              <SmartBackButton fallback="/">
+                Back <ArrowRight />
+              </SmartBackButton>
               {whatsappFollowUpUrl && (
                 <a href={whatsappFollowUpUrl} target="_blank" rel="noopener noreferrer">
                   WhatsApp Follow-up <ArrowRight />
