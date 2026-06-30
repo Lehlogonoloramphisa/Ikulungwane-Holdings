@@ -4114,8 +4114,8 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .service-menu-index button {
   display: grid;
-  grid-template-columns: 48px 38px minmax(0, 1fr) auto;
-  gap: 22px;
+  grid-template-columns: 44px 34px minmax(0, 1fr) minmax(96px, auto);
+  gap: clamp(12px, 1.6vw, 20px);
   width: 100%;
   align-items: center;
   border: 0;
@@ -4158,21 +4158,25 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .service-menu-index strong {
+  min-width: 0;
   color: white;
-  font-size: clamp(24px, 3.6vw, 48px);
+  font-size: clamp(20px, 2.5vw, 36px);
   font-weight: 900;
-  line-height: 0.98;
+  line-height: 1.04;
   text-transform: uppercase;
   letter-spacing: 0;
 }
 
 .service-menu-index em {
+  justify-self: end;
   color: rgba(255, 255, 255, 0.42);
-  font-size: 12px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 800;
+  text-align: right;
   text-transform: uppercase;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .service-menu-preview {
@@ -4272,9 +4276,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .service-package-stream h3 {
   margin: 12px 0 0;
   color: white;
-  font-size: clamp(28px, 4vw, 54px);
+  font-size: clamp(24px, 3vw, 42px);
   font-weight: 900;
-  line-height: 0.96;
+  line-height: 1.02;
   text-transform: uppercase;
   letter-spacing: 0;
 }
@@ -4293,17 +4297,20 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .service-package-list strong {
   display: block;
   color: white;
-  font-size: 17px;
+  font-size: clamp(15px, 1.25vw, 17px);
   font-weight: 900;
+  line-height: 1.25;
 }
 
 .service-package-list em {
   display: block;
   margin: 6px 0 20px;
   color: var(--ashley-accent);
-  font-size: 24px;
+  font-size: clamp(18px, 1.9vw, 22px);
   font-style: normal;
   font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .service-package-list ul {
@@ -4898,11 +4905,25 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .service-menu-index button {
-    grid-template-columns: 36px 32px minmax(0, 1fr);
+    grid-template-columns: 34px 30px minmax(0, 1fr);
+    gap: 12px;
+    padding: 22px 0;
   }
 
   .service-menu-index em {
     grid-column: 3;
+    justify-self: start;
+    margin-top: 4px;
+    text-align: left;
+  }
+
+  .service-menu-index strong {
+    font-size: clamp(19px, 6.4vw, 26px);
+    line-height: 1.08;
+  }
+
+  .service-package-stream h3 {
+    font-size: clamp(24px, 8vw, 34px);
   }
 
   .service-package-list,
