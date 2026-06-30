@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2000" role="img" aria-label="Ikulungwane visual fallback">
+  <defs>
+    <linearGradient id="bg" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#071716"/>
+      <stop offset="0.52" stop-color="#050505"/>
+      <stop offset="1" stop-color="#150506"/>
+    </linearGradient>
+    <radialGradient id="teal" cx="28%" cy="32%" r="62%">
+      <stop offset="0" stop-color="#39d6c2" stop-opacity="0.42"/>
+      <stop offset="0.48" stop-color="#39d6c2" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#39d6c2" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.17"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="2000" fill="url(#bg)"/>
+  <rect width="1600" height="2000" fill="url(#teal)"/>
+  <rect x="210" y="240" width="1120" height="1300" fill="#ffffff" opacity="0.045"/>
+  <rect x="330" y="370" width="620" height="780" fill="#e11d2e" opacity="0.16"/>
+  <circle cx="1110" cy="1220" r="290" fill="#39d6c2" opacity="0.13"/>
+  <path d="M190 460 H1390 M190 720 H1390 M190 980 H1390" stroke="#ffffff" stroke-opacity="0.075" stroke-width="3"/>
+  <path d="M1090 260 V1640" stroke="#e11d2e" stroke-opacity="0.34" stroke-width="8"/>
+  <rect width="1600" height="2000" filter="url(#grain)" opacity="0.34"/>
+  <text x="120" y="1800" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" letter-spacing="8">IKULUNGWANE</text>
+  <text x="124" y="1886" fill="#e11d2e" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="12">PRODUCT LIGHT</text>
+</svg>

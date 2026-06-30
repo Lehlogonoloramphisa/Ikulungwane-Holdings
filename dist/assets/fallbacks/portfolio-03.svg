@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2000" role="img" aria-label="Ikulungwane visual fallback">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#050505"/>
+      <stop offset="0.54" stop-color="#10100f"/>
+      <stop offset="1" stop-color="#092d2b"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.13"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="2000" fill="url(#bg)"/>
+  <polygon points="160,260 1180,120 1450,1540 360,1740" fill="url(#panel)"/>
+  <polygon points="360,440 1030,340 1220,1320 510,1430" fill="#e11d2e" opacity="0.12"/>
+  <path d="M180 1500 C520 1220 720 1260 1040 840 C1200 630 1320 420 1500 300" fill="none" stroke="#ffffff" stroke-opacity="0.16" stroke-width="4"/>
+  <path d="M120 520 C520 640 780 550 1150 730 C1370 840 1490 1000 1580 1130" fill="none" stroke="#39d6c2" stroke-opacity="0.26" stroke-width="5"/>
+  <rect width="1600" height="2000" filter="url(#grain)" opacity="0.36"/>
+  <text x="120" y="1800" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" letter-spacing="8">IKULUNGWANE</text>
+  <text x="124" y="1886" fill="#e11d2e" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="12">SELECTED WORK</text>
+</svg>

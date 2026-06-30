@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2000" role="img" aria-label="Ikulungwane visual fallback">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#030303"/>
+      <stop offset="0.5" stop-color="#111111"/>
+      <stop offset="1" stop-color="#21080c"/>
+    </linearGradient>
+    <radialGradient id="red" cx="70%" cy="26%" r="60%">
+      <stop offset="0" stop-color="#e11d2e" stop-opacity="0.58"/>
+      <stop offset="0.45" stop-color="#e11d2e" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#e11d2e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.84" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.16"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="2000" fill="url(#bg)"/>
+  <rect width="1600" height="2000" fill="url(#red)"/>
+  <rect x="170" y="210" width="1260" height="430" fill="#ffffff" opacity="0.035"/>
+  <rect x="170" y="720" width="980" height="930" fill="#39d6c2" opacity="0.06"/>
+  <path d="M240 1560 C500 1250 790 1180 1010 870 C1150 672 1240 472 1430 300" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="5"/>
+  <path d="M0 1280 L1600 900" stroke="#e11d2e" stroke-opacity="0.36" stroke-width="12"/>
+  <rect width="1600" height="2000" filter="url(#grain)" opacity="0.32"/>
+  <text x="120" y="1800" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" letter-spacing="8">IKULUNGWANE</text>
+  <text x="124" y="1886" fill="#e11d2e" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="12">BRAND STORY</text>
+</svg>

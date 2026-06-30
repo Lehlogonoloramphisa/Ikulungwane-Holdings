@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2000" role="img" aria-label="Ikulungwane visual fallback">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0b0a"/>
+      <stop offset="0.48" stop-color="#050505"/>
+      <stop offset="1" stop-color="#160507"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.14"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="2000" fill="url(#bg)"/>
+  <path d="M0 1620 C260 1500 420 1280 740 1320 C1010 1354 1120 1600 1600 1420 V2000 H0 Z" fill="#39d6c2" opacity="0.12"/>
+  <path d="M0 420 C300 520 570 300 800 380 C1040 464 1170 700 1600 580 V0 H0 Z" fill="#e11d2e" opacity="0.17"/>
+  <rect x="230" y="360" width="1140" height="980" fill="#ffffff" opacity="0.04"/>
+  <rect x="410" y="520" width="780" height="880" fill="#000000" opacity="0.22"/>
+  <path d="M260 1510 L1340 290" stroke="#ffffff" stroke-opacity="0.13" stroke-width="4"/>
+  <rect width="1600" height="2000" filter="url(#grain)" opacity="0.32"/>
+  <text x="120" y="1800" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" letter-spacing="8">IKULUNGWANE</text>
+  <text x="124" y="1886" fill="#e11d2e" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="12">IMAGE FALLBACK</text>
+</svg>
