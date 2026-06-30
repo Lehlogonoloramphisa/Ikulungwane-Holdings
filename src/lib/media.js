@@ -6,6 +6,19 @@ const DRIVE_ID_PATTERNS = [
   /[?&]id=([^&]+)/i,
 ];
 
+const UPLOAD_MEDIA_VERSION = "20260630-mobile";
+
+const directUploadMediaUrl = (value) => {
+  const url = String(value || "").trim();
+  const match = url.match(/(?:^|\/)(?:api\/)?uploads\/([^?#]+)/i);
+  if (!match?.[1]) return url;
+
+  const filename = decodeURIComponent(match[1]).split("/").pop();
+  if (!filename) return url;
+
+  return `/api/media.php?file=${encodeURIComponent(filename)}&v=${UPLOAD_MEDIA_VERSION}`;
+};
+
 export const googleDriveFileId = (value) => {
   const url = String(value || "").trim();
   if (!url || !/drive\.google\.com/i.test(url)) return "";
@@ -35,7 +48,8 @@ export const googleDriveDocumentDownloadUrl = (value) => {
 export const normalizeMediaUrl = (value) => {
   const url = String(value || "").trim();
   if (!url) return "";
-  return /drive\.google\.com/i.test(url) ? googleDriveImageUrl(url) : url;
+  const normalizedUrl = /drive\.google\.com/i.test(url) ? googleDriveImageUrl(url) : url;
+  return directUploadMediaUrl(normalizedUrl);
 };
 
 export const normalizeDocumentUrl = (value) => {
@@ -56,6 +70,7 @@ export const isUploadedMediaUrl = (value) => {
   const url = String(value || "");
   return (
     url.startsWith("data:image/") ||
+    url.includes("/api/media.php") ||
     url.includes("/api/uploads/") ||
     url.includes("/uploads/") ||
     url.includes("drive.google.com/thumbnail")

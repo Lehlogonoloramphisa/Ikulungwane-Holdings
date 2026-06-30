@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from '@/components/ScrollToTop';
 import { getSetupStatus } from '@/lib/setupApi';
-import { installImageFallbacks } from '@/lib/imageFallbacks';
 
 // Layout
 import SiteLayout from './components/layout/SiteLayout';
@@ -134,8 +133,6 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  useEffect(() => installImageFallbacks(document), []);
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

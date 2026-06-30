@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 session_start();
 
 define('IKU_DB_CONFIG', __DIR__ . '/config/database.php');
-define('IKU_UPLOAD_DIR', __DIR__ . '/uploads');
-define('IKU_UPLOAD_URL', '/api/uploads');
+define('IKU_UPLOAD_URL', '/api/media.php?file=');
 
 function upload_json($status, $body) {
     http_response_code($status);
@@ -70,19 +69,34 @@ function require_admin(PDO $pdo) {
     }
 }
 
-function ensure_upload_dir() {
-    if (!is_dir(IKU_UPLOAD_DIR) && !mkdir(IKU_UPLOAD_DIR, 0755, true)) {
-        upload_json(500, ['error' => 'Could not create uploads folder.']);
-    }
+function upload_directories() {
+    return [
+        dirname(dirname(__DIR__)) . '/ikulungwane_uploads',
+        dirname(__DIR__) . '/uploads',
+        __DIR__ . '/uploads',
+    ];
+}
 
-    if (!is_writable(IKU_UPLOAD_DIR)) {
-        upload_json(500, ['error' => 'The uploads folder is not writable.']);
-    }
-
-    $htaccess = IKU_UPLOAD_DIR . '/.htaccess';
+function protect_upload_dir($directory) {
+    $htaccess = $directory . '/.htaccess';
     if (!file_exists($htaccess)) {
         @file_put_contents($htaccess, "Options -Indexes\n<FilesMatch \"\\.(php|php[0-9]?|phtml|phar)$\">\n  Require all denied\n</FilesMatch>\n");
     }
+}
+
+function ensure_upload_dir() {
+    foreach (upload_directories() as $directory) {
+        if (!is_dir($directory)) {
+            @mkdir($directory, 0755, true);
+        }
+
+        if (is_dir($directory) && is_writable($directory)) {
+            protect_upload_dir($directory);
+            return $directory;
+        }
+    }
+
+    upload_json(500, ['error' => 'The uploads folder is not writable.']);
 }
 
 function extension_from_name($name) {
@@ -145,11 +159,11 @@ try {
         upload_json(422, ['error' => 'The selected file is not a supported image, video, or document.']);
     }
 
-    ensure_upload_dir();
+    $upload_dir = ensure_upload_dir();
 
     $token = bin2hex(random_bytes(10));
     $filename = date('Ymd-His') . '-' . $token . '.' . $extension;
-    $target = IKU_UPLOAD_DIR . '/' . $filename;
+    $target = $upload_dir . '/' . $filename;
 
     if (!move_uploaded_file($file['tmp_name'], $target)) {
         upload_json(500, ['error' => 'Could not save the uploaded file.']);
@@ -158,7 +172,7 @@ try {
     @chmod($target, 0644);
 
     upload_json(200, [
-        'file_url' => IKU_UPLOAD_URL . '/' . $filename,
+        'file_url' => IKU_UPLOAD_URL . rawurlencode($filename),
         'original_filename' => $file['name'] ?? $filename,
         'mime_type' => $mime,
         'size_bytes' => (int) ($file['size'] ?? 0),

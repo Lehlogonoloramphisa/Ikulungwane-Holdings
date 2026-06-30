@@ -21,6 +21,13 @@ RewriteEngine On
   </FilesMatch>
 </IfModule>
 
+# Missing uploaded media should never be routed to React's index.html.
+# Route legacy /api/uploads paths through the media endpoint, which serves
+# actual uploaded files from the permanent uploads directory.
+RewriteCond %{REQUEST_URI} ^/api/uploads/ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^api/uploads/([^/]+)$ api/media.php?file=$1 [L,QSA]
+
 # Let real files and directories load normally, including /api/*.php endpoints.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
