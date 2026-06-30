@@ -784,6 +784,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   background: transparent;
   color: inherit;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .cinema-transition-frame {

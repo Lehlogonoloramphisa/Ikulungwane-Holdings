@@ -62,6 +62,7 @@ export default function CinematicPortfolioExperience({
   showTransition = true,
   showIntro = true,
   showStickyShowcase = true,
+  horizontalProjectLink = null,
   maxProjects = 8,
 }) {
   const rootRef = useRef(null);
@@ -476,26 +477,44 @@ export default function CinematicPortfolioExperience({
       <div className="cinema-horizontal">
         <div className="cinema-horizontal-viewport">
           <div className="cinema-horizontal-track">
-            {display.map((project, index) => (
-              <button
-                key={project.id}
-                type="button"
-                className={`cinema-project-panel ${WIDTH_CLASSES[index % WIDTH_CLASSES.length]}`}
-                onClick={(event) => openCaseStudy(project, event)}
-                aria-label={`Open ${project.title}`}
-              >
-                <img className="cinema-horizontal-image" src={project.cover_image} alt={project.title} />
-                <span className="cinema-project-index">{String(index + 1).padStart(2, "0")}</span>
-                <span className="cinema-project-meta">
-                  <em>{categoryLabel(project.category)}</em>
-                  <strong>{project.gallery_images?.length || 1} images</strong>
-                </span>
-                <span className="cinema-hover-title">
-                  {project.title}
-                  <ArrowUpRight />
-                </span>
-              </button>
-            ))}
+            {display.map((project, index) => {
+              const panelClassName = `cinema-project-panel ${WIDTH_CLASSES[index % WIDTH_CLASSES.length]}`;
+              const panelContent = (
+                <>
+                  <img className="cinema-horizontal-image" src={project.cover_image} alt={project.title} />
+                  <span className="cinema-project-index">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="cinema-project-meta">
+                    <em>{categoryLabel(project.category)}</em>
+                    <strong>{project.gallery_images?.length || 1} images</strong>
+                  </span>
+                  <span className="cinema-hover-title">
+                    {horizontalProjectLink ? categoryLabel(project.category) : project.title}
+                    <ArrowUpRight />
+                  </span>
+                </>
+              );
+
+              return horizontalProjectLink ? (
+                <Link
+                  key={project.id}
+                  to={horizontalProjectLink}
+                  className={panelClassName}
+                  aria-label={`Enter the full portfolio from ${project.title}`}
+                >
+                  {panelContent}
+                </Link>
+              ) : (
+                <button
+                  key={project.id}
+                  type="button"
+                  className={panelClassName}
+                  onClick={(event) => openCaseStudy(project, event)}
+                  aria-label={`Open ${project.title}`}
+                >
+                  {panelContent}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

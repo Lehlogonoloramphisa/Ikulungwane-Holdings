@@ -25,6 +25,7 @@ export default function FeaturedPortfolio() {
       showPortfolioLink
       showTransition={false}
       showStickyShowcase={false}
+      horizontalProjectLink="/portfolio"
       maxProjects={Number(section.featuredProjectCount) || 5}
     />
   );
