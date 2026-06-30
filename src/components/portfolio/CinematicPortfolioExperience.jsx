@@ -12,6 +12,12 @@ const WIDTH_CLASSES = ["is-wide", "is-tall", "is-hero", "is-medium", "is-wide", 
 const MOBILE_MEDIA_QUERY = "(max-width: 900px), (hover: none), (pointer: coarse)";
 
 const normalizeProjectImage = (image) => normalizeMediaUrl(typeof image === "string" ? image : image?.image_url);
+const categoryLabel = (value = "") =>
+  String(value || "Uncategorized")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const normalizeProject = (project, index) => {
   const fallback = fallbackPortfolioProjects[index % fallbackPortfolioProjects.length];
@@ -385,6 +391,8 @@ export default function CinematicPortfolioExperience({
 
   if (display.length === 0) return null;
   const introProject = display[1] || display[0];
+  const categoryCount = new Set(display.map((project) => categoryLabel(project.category))).size;
+  const totalImages = display.reduce((total, project) => total + (project.gallery_images?.length || 1), 0);
 
   return (
     <section ref={rootRef} id="selected-work" className="cinema-portfolio">
@@ -418,6 +426,33 @@ export default function CinematicPortfolioExperience({
             <p>{eyebrow}</p>
             <h3>{title}</h3>
             <span>{intro}</span>
+            <div className="cinema-intro-metrics" aria-label="Selected work summary">
+              <span>
+                <strong>{String(display.length).padStart(2, "0")}</strong>
+                <em>Projects</em>
+              </span>
+              <span>
+                <strong>{String(categoryCount).padStart(2, "0")}</strong>
+                <em>Categories</em>
+              </span>
+              <span>
+                <strong>{String(totalImages).padStart(2, "0")}</strong>
+                <em>Images</em>
+              </span>
+            </div>
+            <div className="cinema-intro-index">
+              {display.slice(0, 4).map((project, index) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  onClick={(event) => openCaseStudy(project, event)}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{project.title}</strong>
+                  <em>{categoryLabel(project.category)}</em>
+                </button>
+              ))}
+            </div>
           </div>
           <button
             type="button"
@@ -451,6 +486,10 @@ export default function CinematicPortfolioExperience({
               >
                 <img className="cinema-horizontal-image" src={project.cover_image} alt={project.title} />
                 <span className="cinema-project-index">{String(index + 1).padStart(2, "0")}</span>
+                <span className="cinema-project-meta">
+                  <em>{categoryLabel(project.category)}</em>
+                  <strong>{project.gallery_images?.length || 1} images</strong>
+                </span>
                 <span className="cinema-hover-title">
                   {project.title}
                   <ArrowUpRight />
@@ -492,7 +531,7 @@ export default function CinematicPortfolioExperience({
                   aria-hidden="true"
                 />
                 <h3>{project.title}</h3>
-                <p>{project.category}</p>
+                <p>{categoryLabel(project.category)}</p>
                 <em>{project.description}</em>
                 <ArrowRight />
               </button>
@@ -526,7 +565,7 @@ export default function CinematicPortfolioExperience({
             <X />
           </button>
           <div className="cinema-case-content">
-            <p>{caseStudy.project.category}</p>
+            <p>{categoryLabel(caseStudy.project.category)}</p>
             <h2>{caseStudy.project.title}</h2>
             <span>{caseStudy.project.description}</span>
             {caseStudy.project.gallery_images?.length > 1 && (
@@ -580,7 +619,7 @@ export default function CinematicPortfolioExperience({
               </button>
               <div className="portfolio-image-lightbox-caption">
                 <p>{caseStudy.project.title}</p>
-                <span>{activeCaseImage.caption || caseStudy.project.category}</span>
+                <span>{activeCaseImage.caption || categoryLabel(caseStudy.project.category)}</span>
               </div>
             </div>
           )}
