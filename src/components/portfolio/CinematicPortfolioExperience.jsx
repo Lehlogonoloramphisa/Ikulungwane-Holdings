@@ -145,7 +145,8 @@ export default function CinematicPortfolioExperience({
     if (!root || display.length === 0) return undefined;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return undefined;
+    const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+    if (prefersReducedMotion || isMobileViewport) return undefined;
 
     const images = Array.from(root.querySelectorAll("img"));
     const refresh = () => ScrollTrigger.refresh();
@@ -483,6 +484,12 @@ export default function CinematicPortfolioExperience({
                 onClick={(event) => openCaseStudy(project, event)}
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
+                <img
+                  className="cinema-sticky-item-image"
+                  src={project.cover_image}
+                  alt=""
+                  aria-hidden="true"
+                />
                 <h3>{project.title}</h3>
                 <p>{project.category}</p>
                 <em>{project.description}</em>

@@ -1035,6 +1035,10 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   cursor: pointer;
 }
 
+.cinema-sticky-item-image {
+  display: none;
+}
+
 .cinema-sticky-item span {
   display: block;
   margin-bottom: 24px;
@@ -9215,5 +9219,120 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
   .about-values {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile image visibility guard: keep every real image present on small screens. */
+@media (max-width: 768px) {
+  .cinema-transition-image,
+  .cinema-reveal-image,
+  .cinema-horizontal-image,
+  .studio-about-image img,
+  .studio-process-image img,
+  .studio-service-preview img,
+  .services-hero-frame img,
+  .journal-hero-feature img,
+  .journal-post-image img,
+  .about-team-strip img,
+  .portfolio-category-card img,
+  .portfolio-gallery-main img,
+  .portfolio-gallery-strip img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .cinema-transition-image,
+  .cinema-reveal-image,
+  .cinema-horizontal-image {
+    transform: none !important;
+  }
+
+  .cinema-horizontal,
+  .cinema-horizontal-viewport {
+    min-height: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .cinema-horizontal-viewport {
+    display: block;
+  }
+
+  .cinema-horizontal-track {
+    display: grid;
+    width: 100%;
+    gap: 24px;
+    padding: 0 24px 12vh;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  .cinema-project-panel,
+  .cinema-project-panel.is-wide,
+  .cinema-project-panel.is-tall,
+  .cinema-project-panel.is-hero,
+  .cinema-project-panel.is-medium {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+    flex-basis: auto;
+    transform: none !important;
+  }
+
+  .cinema-sticky-showcase {
+    display: block;
+    min-height: auto;
+  }
+
+  .cinema-sticky-image-wrap {
+    min-height: auto;
+    margin-bottom: 30px;
+  }
+
+  .cinema-sticky-image {
+    position: relative;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    transform: none !important;
+  }
+
+  .cinema-sticky-copy {
+    padding-top: 0;
+  }
+
+  .cinema-sticky-item {
+    min-height: auto;
+    padding: 0 0 56px;
+  }
+
+  .cinema-sticky-item-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    margin: 0 0 22px;
+    object-fit: cover;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .studio-about-visual,
+  .studio-process-image,
+  .studio-service-preview,
+  .services-hero-frame,
+  .journal-hero-feature,
+  .journal-post-image,
+  .about-team-strip article > div {
+    min-height: 340px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .studio-about-image.is-main {
+    min-height: 360px;
   }
 }
