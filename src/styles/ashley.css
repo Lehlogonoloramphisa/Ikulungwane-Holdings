@@ -118,6 +118,36 @@ body {
   z-index: 1;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .ashley-frame.has-scroll-presence .scroll-presence-section {
+    perspective: 1100px;
+    perspective-origin: 50% 44%;
+  }
+
+  .ashley-frame.has-scroll-presence .scroll-presence-target {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
+    transform-origin: 50% 28%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: none;
+    will-change: opacity, filter, transform;
+  }
+
+  .ashley-frame.has-scroll-presence .scroll-presence-target:is(span, strong, em, small, label, figcaption) {
+    display: inline-block;
+  }
+
+  .ashley-frame.has-scroll-presence img,
+  .ashley-frame.has-scroll-presence picture,
+  .ashley-frame.has-scroll-presence video,
+  .ashley-frame.has-scroll-presence canvas {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
 .ashley-kicker {
   display: inline-flex;
   align-items: center;
@@ -1087,6 +1117,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .cinema-horizontal {
   position: relative;
   min-height: 100svh;
+  padding: 0;
   background:
     radial-gradient(circle at 16% 20%, rgba(57, 214, 194, 0.08), transparent 28%),
     #050505;
@@ -1115,7 +1146,13 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   border-radius: 10px;
   outline: 1px solid rgba(255, 255, 255, 0.08);
   outline-offset: -1px;
+  scroll-snap-align: center;
   will-change: transform;
+}
+
+.cinema-horizontal-image {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .cinema-project-panel.is-wide {
@@ -3044,10 +3081,9 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .studio-about-section {
-  min-height: 100svh;
-  padding: 14vh 0;
+  min-height: auto;
+  padding: clamp(92px, 12vh, 128px) 0;
   background:
-    radial-gradient(circle at 12% 12%, rgba(225, 29, 46, 0.09), transparent 28%),
     #080807;
 }
 
@@ -3064,15 +3100,23 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   pointer-events: none;
 }
 
+.studio-about-section .studio-chapter-title {
+  display: none;
+}
+
 .studio-about-inner {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 0.88fr) minmax(360px, 1fr);
-  gap: 8vw;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: clamp(36px, 6vw, 72px);
   width: min(100% - 48px, 1280px);
   margin: 0 auto;
-  align-items: center;
+  align-items: start;
+}
+
+.studio-about-copy {
+  max-width: 680px;
 }
 
 .studio-about-copy h2,
@@ -3103,7 +3147,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   display: grid;
   gap: 0;
   max-width: 620px;
-  margin: 38px 0;
+  margin: 30px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -3134,12 +3178,17 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
 .studio-about-visual {
   position: relative;
-  min-height: 720px;
+  display: grid;
+  gap: 16px;
+  min-height: 0;
 }
 
 .studio-about-image {
-  position: absolute;
+  position: relative;
   overflow: hidden;
+  width: 100%;
+  min-height: 420px;
+  aspect-ratio: 4 / 5;
 }
 
 .studio-about-image img {
@@ -3150,26 +3199,27 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .studio-about-image.is-main {
-  right: 0;
-  top: 0;
-  width: 88%;
-  height: 78%;
+  right: auto;
+  top: auto;
+  width: 100%;
+  height: auto;
 }
 
 .studio-about-stats {
-  position: absolute;
-  right: 8%;
-  bottom: 0;
+  position: relative;
+  right: auto;
+  bottom: auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: min(88%, 560px);
+  width: 100%;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(5, 5, 5, 0.72);
-  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .studio-about-stats div {
-  padding: 22px;
+  padding: 18px 16px;
   border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -3180,7 +3230,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 .studio-about-stats strong {
   display: block;
   color: var(--ashley-accent);
-  font-size: 34px;
+  font-size: clamp(24px, 3vw, 32px);
   font-weight: 900;
   line-height: 1;
 }
@@ -3725,7 +3775,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .studio-about-visual {
-    min-height: 620px;
+    min-height: 0;
   }
 
   .studio-process-image,
@@ -3774,28 +3824,30 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .studio-about-visual {
-    min-height: 520px;
+    min-height: 0;
   }
 
   .studio-about-image.is-main {
-    width: 88%;
-    height: 70%;
-  }
-
-  .studio-about-image.is-float {
-    width: 56%;
-    height: 34%;
-    border-width: 8px;
+    width: 100%;
+    height: auto;
+    min-height: 340px;
   }
 
   .studio-about-stats {
     left: 0;
     right: auto;
     width: 100%;
+    grid-template-columns: 1fr;
   }
 
   .studio-about-stats div {
     padding: 16px 12px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .studio-about-stats div:last-child {
+    border-bottom: 0;
   }
 
   .studio-about-stats strong {
@@ -5416,11 +5468,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .ashley-shell :is(
-  .cinema-intro-index button,
-  .portfolio-category-filter button,
-  .portfolio-project-rail > button,
   .portfolio-gallery-nav button,
-  .service-menu-index button,
   .journal-filter-rail button,
   .contact-form-panel button,
   .booking-step-rail button,
@@ -5437,15 +5485,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 }
 
 .ashley-shell :is(
-  .cinema-intro-index button:hover,
-  .cinema-intro-index button:focus-visible,
-  .portfolio-category-filter button:hover,
-  .portfolio-category-filter button.is-active,
-  .portfolio-project-rail > button:hover,
-  .portfolio-project-rail > button:focus-visible,
   .portfolio-gallery-nav button:hover,
-  .service-menu-index button:hover,
-  .service-menu-index button.is-active,
   .journal-filter-rail button:hover,
   .journal-filter-rail button.is-active,
   .contact-form-panel button:hover,
@@ -9772,7 +9812,7 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 
   .studio-about-visual {
-    min-height: clamp(560px, 66vh, 660px);
+    min-height: 0;
   }
 
   .studio-process-image,
@@ -10080,20 +10120,28 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
 
   .cinema-horizontal,
   .cinema-horizontal-viewport {
-    min-height: auto;
+    min-height: clamp(520px, 78svh, 700px);
     height: auto;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .cinema-horizontal-viewport {
-    display: block;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
   }
 
   .cinema-horizontal-track {
-    display: grid;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    width: max-content;
     gap: 24px;
-    padding: 0 24px 12vh;
+    padding: 56px 24px;
     transform: none !important;
     will-change: auto;
   }
@@ -10103,12 +10151,13 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   .cinema-project-panel.is-tall,
   .cinema-project-panel.is-hero,
   .cinema-project-panel.is-medium {
-    width: 100%;
+    flex: 0 0 min(82vw, 420px);
+    width: min(82vw, 420px);
     height: 460px;
     height: clamp(320px, 72vh, 560px);
     min-height: 320px;
     aspect-ratio: 4 / 5;
-    flex-basis: auto;
+    scroll-snap-align: center;
     transform: none !important;
   }
 

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AshleyEffects from "./AshleyEffects";
+import ScrollPresenceEffects from "./ScrollPresenceEffects";
 import { useCms } from "@/lib/cms";
 import { applyBrandingVariables } from "@/lib/branding";
 
@@ -53,6 +54,7 @@ export default function SiteLayout() {
   return (
     <div className="ashley-shell min-h-screen bg-black text-white">
       <AshleyEffects settings={cms.global.animations} />
+      <ScrollPresenceEffects enabled={cms.global.animations?.sectionEntrances !== false} />
       <Navbar />
       <main className="ashley-frame">
         <Outlet />

@@ -3,13 +3,34 @@ const DRIVE_ID_PATTERNS = [
   /drive\.google\.com\/open\?id=([^&]+)/i,
   /drive\.google\.com\/uc\?[^#]*id=([^&]+)/i,
   /drive\.google\.com\/thumbnail\?[^#]*id=([^&]+)/i,
+  /drive\.usercontent\.google\.com\/download\?[^#]*id=([^&]+)/i,
   /[?&]id=([^&]+)/i,
 ];
 
 const UPLOAD_MEDIA_VERSION = "20260630-mobile";
+const URL_BASE = "https://ikulungwane.local";
+
+const isAbsoluteUrl = (value) => /^[a-z][a-z\d+.-]*:\/\//i.test(String(value || ""));
 
 const directUploadMediaUrl = (value) => {
   const url = String(value || "").trim();
+
+  if (/^data:/i.test(url)) return url;
+
+  try {
+    const parsedUrl = new URL(url, URL_BASE);
+    if (/\/api\/media\.php$/i.test(parsedUrl.pathname)) {
+      const filename = parsedUrl.searchParams.get("file");
+      if (filename) {
+        parsedUrl.searchParams.set("file", decodeURIComponent(filename).split("/").pop());
+        parsedUrl.searchParams.set("v", UPLOAD_MEDIA_VERSION);
+        return isAbsoluteUrl(url) ? parsedUrl.href : `${parsedUrl.pathname}?${parsedUrl.searchParams.toString()}`;
+      }
+    }
+  } catch {
+    // Keep checking legacy upload paths below.
+  }
+
   const match = url.match(/(?:^|\/)(?:api\/)?uploads\/([^?#]+)/i);
   if (!match?.[1]) return url;
 
@@ -21,7 +42,7 @@ const directUploadMediaUrl = (value) => {
 
 export const googleDriveFileId = (value) => {
   const url = String(value || "").trim();
-  if (!url || !/drive\.google\.com/i.test(url)) return "";
+  if (!url || !/(drive\.google\.com|drive\.usercontent\.google\.com)/i.test(url)) return "";
 
   const match = DRIVE_ID_PATTERNS.map((pattern) => url.match(pattern)).find(Boolean);
   return match?.[1] ? decodeURIComponent(match[1]) : "";
@@ -48,7 +69,7 @@ export const googleDriveDocumentDownloadUrl = (value) => {
 export const normalizeMediaUrl = (value) => {
   const url = String(value || "").trim();
   if (!url) return "";
-  const normalizedUrl = /drive\.google\.com/i.test(url) ? googleDriveImageUrl(url) : url;
+  const normalizedUrl = /(drive\.google\.com|drive\.usercontent\.google\.com)/i.test(url) ? googleDriveImageUrl(url) : url;
   return directUploadMediaUrl(normalizedUrl);
 };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { normalizeMediaUrl } from "@/lib/media";
 
 export const projectImageTokens = {
   radiusSmall: 5,
@@ -37,7 +38,8 @@ export const projectImageTokens = {
   },
 };
 
-const imageList = (images = []) => images.filter(Boolean);
+const imageUrl = (image) => normalizeMediaUrl(typeof image === "string" ? image : image?.image_url);
+const imageList = (images = []) => images.map(imageUrl).filter(Boolean);
 
 export function ImageLoopCard({
   images,
@@ -86,7 +88,7 @@ export function GalleryMediaCard({
   projectTitle,
   onClick,
 }) {
-  const src = typeof image === "string" ? image : image?.image_url;
+  const src = imageUrl(image);
   const caption = typeof image === "object" ? image.caption || image.alt_text || "" : "";
   const isVideo = /\.(mp4|mov|webm)(?:[?#].*)?$/i.test(src || "");
 

@@ -228,6 +228,7 @@ export default function CinematicPortfolioExperience({
             scale: 1,
             duration: 1.05,
             ease: "power3.out",
+            immediateRender: false,
             scrollTrigger: {
               trigger: transitionSection,
               start: "top 78%",
@@ -246,6 +247,7 @@ export default function CinematicPortfolioExperience({
             scale: 1,
             duration: 0.95,
             ease: "power3.out",
+            immediateRender: false,
             scrollTrigger: {
               trigger: image,
               start: "top 82%",
@@ -256,41 +258,35 @@ export default function CinematicPortfolioExperience({
       });
 
       const horizontal = root.querySelector(".cinema-horizontal");
+      const viewport = root.querySelector(".cinema-horizontal-viewport");
       const track = root.querySelector(".cinema-horizontal-track");
 
-      if (horizontal && track) {
-        const distance = () => Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.12);
-        const horizontalTween = gsap.to(track, {
+      if (horizontal && viewport && track) {
+        const distance = () => {
+          const panels = Array.from(track.querySelectorAll(".cinema-project-panel"));
+          const lastPanel = panels[panels.length - 1];
+          const viewportWidth = viewport.clientWidth || window.innerWidth;
+          if (!lastPanel) return Math.max(0, track.scrollWidth - viewportWidth);
+
+          const endingBreath = Math.min(viewportWidth * 0.045, 56);
+          return Math.max(0, lastPanel.offsetLeft + lastPanel.offsetWidth - viewportWidth + endingBreath);
+        };
+
+        gsap.to(track, {
           x: () => -distance(),
           ease: "none",
+          overwrite: "auto",
           scrollTrigger: {
             trigger: horizontal,
             pin: true,
-            scrub: 1,
+            pinType: "fixed",
+            pinSpacing: true,
+            scrub: true,
             start: "top top",
-            end: () => `+=${distance()}`,
+            end: () => `+=${Math.max(1, distance())}`,
             invalidateOnRefresh: true,
             anticipatePin: 1,
           },
-        });
-
-        gsap.utils.toArray(".cinema-horizontal-image").forEach((image) => {
-          gsap.fromTo(
-            image,
-            { opacity: 0, scale: 1.15 },
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.9,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: image,
-                containerAnimation: horizontalTween,
-                start: "left 82%",
-                toggleActions: "play none none reverse",
-              },
-            },
-          );
         });
       }
 
