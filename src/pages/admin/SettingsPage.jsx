@@ -83,8 +83,9 @@ const FONT_OPTIONS = [
 ];
 
 const makeWhatsappUrl = (value) => {
-  const digits = String(value || "").replace(/\D/g, "");
-  if (!digits) return "";
+  let digits = String(value || "").replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (!digits || digits.length < 8) return "";
   const normalized = digits.startsWith("0") ? `27${digits.slice(1)}` : digits;
   return `https://wa.me/${normalized}`;
 };
@@ -255,6 +256,7 @@ export default function SettingsPage({ initialTab = "identity" }) {
   const [saved, setSaved] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTest, setEmailTest] = useState(null);
+  const [whatsappFeedback, setWhatsappFeedback] = useState(null);
   const [content, setContent] = useState(() => deepMerge(cmsDefaults, override));
   const [legalDocuments, setLegalDocuments] = useState(defaultLegalDocuments);
   const [legalLoading, setLegalLoading] = useState(true);
@@ -316,9 +318,28 @@ export default function SettingsPage({ initialTab = "identity" }) {
   };
 
   const handleGenerateWhatsapp = () => {
-    const url = makeWhatsappUrl(get("global.contact.whatsapp") || get("global.contact.phone"));
-    update("global.contact.whatsappUrl", url);
-    update("pages.home.cta.whatsappUrl", url);
+    const sourceNumber = get("global.contact.whatsapp") || get("global.contact.phone");
+    const url = makeWhatsappUrl(sourceNumber);
+
+    if (!url) {
+      setWhatsappFeedback({
+        type: "error",
+        message: "Add a valid WhatsApp number first, then generate the links.",
+      });
+      return;
+    }
+
+    let next = setValueByPath(content, "global.contact.whatsappUrl", url);
+    next = setValueByPath(next, "pages.home.cta.whatsappUrl", url);
+    setContent(next);
+    saveCmsContent(next);
+
+    setSaved(true);
+    setWhatsappFeedback({
+      type: "success",
+      message: `Generated and saved: ${url}`,
+    });
+    window.setTimeout(() => setSaved(false), 1800);
   };
 
   const handleSave = () => {
@@ -523,6 +544,11 @@ export default function SettingsPage({ initialTab = "identity" }) {
                 <Wand2 className="h-4 w-4" />
                 Generate WhatsApp links
               </button>
+              {whatsappFeedback && (
+                <p className={`admin-settings-feedback is-${whatsappFeedback.type}`}>
+                  {whatsappFeedback.message}
+                </p>
+              )}
             </SettingsSection>
           )}
 

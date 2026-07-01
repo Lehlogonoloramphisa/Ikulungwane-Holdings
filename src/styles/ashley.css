@@ -12,6 +12,10 @@
   --ashley-charcoal-2: #171715;
   --ashley-forest: #092d2b;
   --ashley-teal: #39d6c2;
+  --ashley-glass-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.075) 52%, rgba(255, 255, 255, 0.035));
+  --ashley-glass-red: linear-gradient(135deg, rgba(225, 29, 46, 0.9), rgba(225, 29, 46, 0.58) 56%, rgba(255, 255, 255, 0.12));
+  --ashley-glass-border: rgba(255, 255, 255, 0.24);
+  --ashley-glass-shadow: 0 18px 52px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   --site-logo-text-size: 22px;
   --site-footer-logo-text-size: 28px;
   --site-nav-text-size: 11px;
@@ -162,6 +166,20 @@ body {
   gap: clamp(10px, 1.2vw, 16px);
 }
 
+.site-header-menu-button {
+  border-color: var(--ashley-glass-border) !important;
+  background: var(--ashley-glass-surface);
+  box-shadow: var(--ashley-glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+.site-header-menu-button:hover {
+  background:
+    linear-gradient(135deg, rgba(225, 29, 46, 0.52), rgba(225, 29, 46, 0.22));
+  box-shadow: 0 18px 48px rgba(225, 29, 46, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
 .site-brand-logo {
   display: block;
   width: auto;
@@ -297,14 +315,19 @@ body {
   justify-content: center;
   gap: 10px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  isolation: isolate;
+  border: 1px solid var(--ashley-glass-border);
+  background: var(--ashley-glass-surface);
   padding: 13px 24px;
   color: white;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  transition: border-color 220ms ease, color 220ms ease, transform 220ms ease;
+  box-shadow: var(--ashley-glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease, color 220ms ease, transform 220ms ease;
 }
 
 .ashley-button::before {
@@ -312,14 +335,18 @@ body {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--ashley-accent);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(225, 29, 46, 0.42));
   transform: translateX(-102%);
   transition: transform 260ms ease;
 }
 
 .ashley-button:hover {
-  border-color: var(--ashley-accent);
-  color: #050505;
+  border-color: rgba(255, 255, 255, 0.36);
+  background:
+    linear-gradient(135deg, rgba(225, 29, 46, 0.7), rgba(225, 29, 46, 0.42) 52%, rgba(255, 255, 255, 0.14));
+  color: white;
+  box-shadow: 0 22px 60px rgba(225, 29, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.26);
   transform: translateY(-1px);
 }
 
@@ -328,18 +355,21 @@ body {
 }
 
 .ashley-button-primary {
-  border-color: var(--ashley-accent);
-  background: var(--ashley-accent);
-  color: #050505;
+  border-color: rgba(225, 29, 46, 0.56);
+  background: var(--ashley-glass-red);
+  color: white;
+  box-shadow: 0 20px 58px rgba(225, 29, 46, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.26);
 }
 
 .ashley-button-primary::before {
-  background: white;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.26), rgba(225, 29, 46, 0.22));
 }
 
 .ashley-button-dark {
   border-color: rgba(5, 5, 5, 0.16);
-  background: #050505;
+  background:
+    linear-gradient(135deg, rgba(5, 5, 5, 0.68), rgba(255, 255, 255, 0.055));
   color: white;
 }
 
@@ -348,7 +378,7 @@ body {
 }
 
 .ashley-button-dark:hover {
-  color: #050505;
+  color: white;
 }
 
 .ashley-section {
@@ -630,6 +660,38 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
     rgba(5, 5, 5, 0.98);
 }
 
+.ashley-menu-close {
+  position: fixed;
+  top: clamp(18px, 3vw, 32px);
+  right: clamp(16px, 4vw, 42px);
+  z-index: 2;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--ashley-glass-border);
+  background: var(--ashley-glass-surface);
+  padding: 0 14px;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow: var(--ashley-glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.ashley-menu-close:hover {
+  border-color: rgba(225, 29, 46, 0.54);
+  background:
+    linear-gradient(135deg, rgba(225, 29, 46, 0.58), rgba(225, 29, 46, 0.24));
+  color: white;
+  transform: translateY(-1px);
+}
+
 .ashley-menu-link {
   display: inline-flex;
   color: rgba(255, 255, 255, 0.45);
@@ -652,6 +714,15 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   letter-spacing: 0.18em;
   margin-right: 18px;
   margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+  .ashley-menu-close {
+    top: 18px;
+    right: 14px;
+    min-height: 42px;
+    padding: 0 12px;
+  }
 }
 
 .ashley-marquee {
@@ -5344,6 +5415,57 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   }
 }
 
+.ashley-shell :is(
+  .cinema-intro-index button,
+  .portfolio-category-filter button,
+  .portfolio-project-rail > button,
+  .portfolio-gallery-nav button,
+  .service-menu-index button,
+  .journal-filter-rail button,
+  .contact-form-panel button,
+  .booking-step-rail button,
+  .booking-choice-grid button,
+  .booking-budget-grid button,
+  .booking-actions button,
+  .booking-success-card .booking-success-actions button
+) {
+  border-color: var(--ashley-glass-border);
+  background: var(--ashley-glass-surface);
+  box-shadow: var(--ashley-glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+.ashley-shell :is(
+  .cinema-intro-index button:hover,
+  .cinema-intro-index button:focus-visible,
+  .portfolio-category-filter button:hover,
+  .portfolio-category-filter button.is-active,
+  .portfolio-project-rail > button:hover,
+  .portfolio-project-rail > button:focus-visible,
+  .portfolio-gallery-nav button:hover,
+  .service-menu-index button:hover,
+  .service-menu-index button.is-active,
+  .journal-filter-rail button:hover,
+  .journal-filter-rail button.is-active,
+  .contact-form-panel button:hover,
+  .booking-step-rail button:hover,
+  .booking-step-rail button.is-active,
+  .booking-step-rail button.is-complete,
+  .booking-choice-grid button:hover,
+  .booking-choice-grid button.is-selected,
+  .booking-budget-grid button:hover,
+  .booking-budget-grid button.is-selected,
+  .booking-actions button:hover,
+  .booking-actions button.is-primary,
+  .booking-success-card .booking-success-actions button:hover
+) {
+  border-color: rgba(225, 29, 46, 0.56);
+  background: var(--ashley-glass-red);
+  color: white;
+  box-shadow: 0 22px 60px rgba(225, 29, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
 /* Premium admin suite */
 :root {
   --admin-bg: #060606;
@@ -8214,6 +8336,31 @@ body:has(a:hover, button:hover, input:hover, textarea:hover, select:hover) .ashl
   cursor: not-allowed;
   opacity: 0.45;
   transform: none;
+}
+
+.admin-settings-feedback {
+  width: fit-content;
+  max-width: 100%;
+  margin: -4px 0 0;
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-settings-feedback.is-success {
+  border-color: rgba(134, 239, 172, 0.28);
+  background: rgba(34, 197, 94, 0.08);
+  color: #bbf7d0;
+}
+
+.admin-settings-feedback.is-error {
+  border-color: rgba(254, 202, 202, 0.34);
+  background: rgba(225, 29, 46, 0.1);
+  color: #fecaca;
 }
 
 .admin-repeat-heading {

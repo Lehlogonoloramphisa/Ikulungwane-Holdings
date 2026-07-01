@@ -46,6 +46,15 @@ export default function Navbar() {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -102,7 +111,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="grid h-12 w-12 place-items-center border border-white/12 text-white transition-colors hover:border-[var(--ashley-accent)] hover:text-[var(--ashley-accent)]"
+              className="site-header-menu-button grid h-12 w-12 place-items-center border border-white/12 text-white transition-colors hover:border-[var(--ashley-accent)] hover:text-[var(--ashley-accent)]"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
             >
@@ -121,6 +130,16 @@ export default function Navbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.24 }}
           >
+            <button
+              type="button"
+              className="ashley-menu-close"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu panel"
+              title="Close menu"
+            >
+              <X className="h-5 w-5" />
+              <span>Close</span>
+            </button>
             <div className="mx-auto grid min-h-screen max-w-7xl gap-12 px-6 pb-12 pt-28 lg:grid-cols-[1fr_360px] lg:items-end">
               <motion.div
                 initial={{ y: 24, opacity: 0 }}
