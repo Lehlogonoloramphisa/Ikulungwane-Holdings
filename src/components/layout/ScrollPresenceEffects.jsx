@@ -76,42 +76,34 @@ const resetTarget = (target) => {
 };
 
 const updateTarget = (config) => {
-  const rect = config.target.getBoundingClientRect();
+  const sectionRect = config.section.getBoundingClientRect();
+  const targetRect = config.target.getBoundingClientRect();
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
 
-  if (!rect.width && !rect.height) {
+  if (!targetRect.width && !targetRect.height) {
     resetTarget(config.target);
     return;
   }
 
-  const centerOffset = (rect.top + rect.height * 0.5 - viewportHeight * 0.5) / (viewportHeight * 0.86);
-  const normalized = clamp(centerOffset, -1.22, 1.22);
-  const scatter = smoothstep(0.2, 1.1, Math.abs(normalized));
+  const enterProgress = smoothstep(viewportHeight * 0.96, viewportHeight * 0.58, sectionRect.top);
+  const leaveProgress = smoothstep(viewportHeight * 0.38, viewportHeight * 0.04, sectionRect.bottom);
+  const isEntering = sectionRect.top > viewportHeight * 0.58;
+  const slide = clamp(Math.max(1 - enterProgress, leaveProgress), 0, 1);
 
-  if (scatter < 0.015) {
+  if (slide < 0.015) {
     config.target.style.opacity = "1";
     config.target.style.filter = "blur(0px)";
-    config.target.style.transform = "translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1)";
+    config.target.style.transform = "translate3d(0, 0, 0)";
     return;
   }
 
-  const before = normalized < 0;
-  const x = (before ? config.beforeX : config.afterX) * scatter;
-  const y = (before ? config.beforeY : config.afterY) * scatter;
-  const rotateX = (before ? config.beforeRotateX : config.afterRotateX) * scatter;
-  const rotateZ = (before ? config.beforeRotateZ : config.afterRotateZ) * scatter;
-  const scale = 1 - scatter * 0.08;
-  const opacity = clamp(1 - scatter * 0.94, 0, 1);
-  const blur = scatter * 8;
+  const x = config.sideX * slide * (isEntering ? -1 : 1);
+  const opacity = clamp(1 - slide * 0.34, 0.66, 1);
+  const blur = slide * 2.4;
 
   config.target.style.opacity = opacity.toFixed(3);
   config.target.style.filter = `blur(${blur.toFixed(2)}px)`;
-  config.target.style.transform = [
-    `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`,
-    `rotateX(${rotateX.toFixed(2)}deg)`,
-    `rotateZ(${rotateZ.toFixed(2)}deg)`,
-    `scale(${scale.toFixed(3)})`,
-  ].join(" ");
+  config.target.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;
 };
 
 export default function ScrollPresenceEffects({ enabled = true }) {
@@ -135,21 +127,13 @@ export default function ScrollPresenceEffects({ enabled = true }) {
       targetsBySection.set(section, targets);
       targets.forEach((target, index) => {
         const direction = index % 2 === 0 ? -1 : 1;
-        const spread = 42 + (index % 5) * 18;
-        const lift = 86 + (index % 4) * 22;
-        const rotate = direction * (9 + (index % 4) * 4);
+        const spread = 34 + (index % 4) * 12;
         target.classList.add("scroll-presence-target");
         target.style.setProperty("--scroll-presence-index", String(index));
         targetConfigs.push({
+          section,
           target,
-          beforeX: direction * spread,
-          beforeY: -lift,
-          afterX: direction * -spread,
-          afterY: lift,
-          beforeRotateX: direction * 18,
-          beforeRotateZ: rotate,
-          afterRotateX: direction * -18,
-          afterRotateZ: -rotate,
+          sideX: direction * spread,
         });
       });
     });

@@ -120,16 +120,13 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .ashley-frame.has-scroll-presence .scroll-presence-section {
-    perspective: 1100px;
-    perspective-origin: 50% 44%;
+    isolation: isolate;
   }
 
   .ashley-frame.has-scroll-presence .scroll-presence-target {
     opacity: 1;
     filter: blur(0);
-    transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
-    transform-origin: 50% 28%;
-    transform-style: preserve-3d;
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     transition: none;
     will-change: opacity, filter, transform;
