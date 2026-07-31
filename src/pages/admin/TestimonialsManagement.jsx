@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { notifyDeleted, notifyProblem, notifySaved, notifySaveProblem, refreshAdminQueries } from "@/lib/adminFeedback";
 
 const empty = { client_name: "", review: "", rating: 5, service_type: "", featured: false, published: true };
 
@@ -24,12 +25,22 @@ export default function TestimonialsManagement() {
 
   const saveMutation = useMutation({
     mutationFn: (data) => data.id ? localApi.entities.Testimonial.update(data.id, data) : localApi.entities.Testimonial.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] }); setDialogOpen(false); setEditing(null); },
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-testimonials"], ["testimonials-featured"]]);
+      setDialogOpen(false);
+      setEditing(null);
+      notifySaved("Testimonial saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the testimonial."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.Testimonial.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-testimonials"], ["testimonials-featured"]]);
+      notifyDeleted("Testimonial deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the testimonial."),
   });
 
   return (

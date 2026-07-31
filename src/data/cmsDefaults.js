@@ -44,6 +44,16 @@ export const cmsDefaults = {
       bookingAutoReplySubject: "We received your booking request",
       bookingAutoReplyMessage: "Thank you for sending your creative brief. We will review the details and respond within one business day.",
     },
+    maintenance: {
+      enabled: false,
+      statusLabel: "Maintenance Mode",
+      title: "We are refining the experience.",
+      message: "The website is temporarily offline while we make updates. Please check back soon.",
+      estimatedReturn: "We will be back online shortly.",
+      showContactLinks: true,
+      metaTitle: "Maintenance | Ikulungwane Holdings",
+      metaDescription: "Ikulungwane Holdings is temporarily offline for scheduled maintenance.",
+    },
     socialLinks: [
       { label: "Instagram", url: "https://www.instagram.com/", enabled: true },
       { label: "Facebook", url: "https://www.facebook.com/", enabled: true },

@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminMediaField from "@/components/admin/AdminMediaField";
+import { notifyDeleted, notifyProblem, notifySaved, notifySaveProblem, refreshAdminQueries } from "@/lib/adminFeedback";
 import { linesToList, listToLines } from "@/lib/adminHelpers";
 import { normalizeMediaUrl } from "@/lib/media";
 
@@ -27,12 +28,22 @@ export default function TeamManagement() {
 
   const saveMutation = useMutation({
     mutationFn: (data) => data.id ? localApi.entities.TeamMember.update(data.id, data) : localApi.entities.TeamMember.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-team"] }); setDialogOpen(false); setEditing(null); },
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-team"], ["team"]]);
+      setDialogOpen(false);
+      setEditing(null);
+      notifySaved("Team member saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the team member."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.TeamMember.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-team"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-team"], ["team"]]);
+      notifyDeleted("Team member deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the team member."),
   });
 
   return (

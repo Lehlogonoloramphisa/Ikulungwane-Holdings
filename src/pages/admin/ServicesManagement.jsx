@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminMediaField from "@/components/admin/AdminMediaField";
+import { notifyDeleted, notifyProblem, notifySaved, notifySaveProblem, refreshAdminQueries } from "@/lib/adminFeedback";
 import { linesToList, listToLines, slugify } from "@/lib/adminHelpers";
 import { normalizeMediaUrl } from "@/lib/media";
 
@@ -30,12 +31,22 @@ export default function ServicesManagement() {
       const payload = { ...data, slug: data.slug || slugify(data.title) };
       return payload.id ? localApi.entities.Service.update(payload.id, payload) : localApi.entities.Service.create(payload);
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-services"] }); setDialogOpen(false); setEditing(null); },
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-services"], ["services"]]);
+      setDialogOpen(false);
+      setEditing(null);
+      notifySaved("Service saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the service."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.Service.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-services"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-services"], ["services"]]);
+      notifyDeleted("Service deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the service."),
   });
 
   const addPackage = () => {

@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminMediaField from "@/components/admin/AdminMediaField";
+import { notifyDeleted, notifyProblem, notifySaved, notifySaveProblem, refreshAdminQueries } from "@/lib/adminFeedback";
 import { linesToList, listToLines, slugify } from "@/lib/adminHelpers";
 import { normalizeMediaUrl } from "@/lib/media";
 
@@ -33,12 +34,22 @@ export default function BlogManagement() {
       const payload = { ...data, slug: data.slug || slugify(data.title) };
       return payload.id ? localApi.entities.BlogPost.update(payload.id, payload) : localApi.entities.BlogPost.create(payload);
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-blog"] }); setDialogOpen(false); setEditing(null); },
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-blog"], ["blog-posts"], ["blog-post-detail"]]);
+      setDialogOpen(false);
+      setEditing(null);
+      notifySaved("Journal post saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the journal post."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.BlogPost.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-blog"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-blog"], ["blog-posts"], ["blog-post-detail"]]);
+      notifyDeleted("Journal post deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the journal post."),
   });
 
   return (

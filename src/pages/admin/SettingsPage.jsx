@@ -15,6 +15,7 @@ import {
   Palette,
   Phone,
   Plus,
+  Power,
   Pencil,
   Save,
   Search,
@@ -35,7 +36,8 @@ import AdminMediaField from "@/components/admin/AdminMediaField";
 import { localApi } from "@/api/localClient";
 import { cmsDefaults } from "@/data/cmsDefaults";
 import { applyBrandingVariables } from "@/lib/branding";
-import { deepMerge, getValueByPath, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
+import { deepMerge, getCmsContent, getValueByPath, refreshCmsContent, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
+import { notifyDeleted, notifySaved, notifySaveProblem, notifyUpdated } from "@/lib/adminFeedback";
 import { emailLinesToList, listToEmailLines, sendSiteEmail } from "@/lib/emailNotifications";
 import {
   defaultLegalDocuments,
@@ -57,6 +59,7 @@ const SETTINGS_NAV = [
   { key: "booking", label: "Booking", icon: CalendarCheck },
   { key: "seo", label: "SEO", icon: Search },
   { key: "experience", label: "Experience", icon: Palette },
+  { key: "maintenance", label: "Maintenance", icon: Power },
   { key: "legal", label: "Legal", icon: ShieldCheck },
 ];
 
@@ -317,7 +320,23 @@ export default function SettingsPage({ initialTab = "identity" }) {
     });
   };
 
-  const handleGenerateWhatsapp = () => {
+  const completeCmsSave = async (nextContent, successMessage) => {
+    const result = await saveCmsContent(nextContent);
+    await refreshCmsContent({ force: true });
+    setContent(getCmsContent());
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1800);
+
+    if (result.savedToBackend) {
+      notifySaved(successMessage);
+      return true;
+    }
+
+    notifySaveProblem(result.error, "Saved in this browser, but the backend did not confirm the change.");
+    return false;
+  };
+
+  const handleGenerateWhatsapp = async () => {
     const sourceNumber = get("global.contact.whatsapp") || get("global.contact.phone");
     const url = makeWhatsappUrl(sourceNumber);
 
@@ -332,20 +351,16 @@ export default function SettingsPage({ initialTab = "identity" }) {
     let next = setValueByPath(content, "global.contact.whatsappUrl", url);
     next = setValueByPath(next, "pages.home.cta.whatsappUrl", url);
     setContent(next);
-    saveCmsContent(next);
+    const savedToBackend = await completeCmsSave(next, "WhatsApp links generated, saved, and refreshed.");
 
-    setSaved(true);
     setWhatsappFeedback({
-      type: "success",
-      message: `Generated and saved: ${url}`,
+      type: savedToBackend ? "success" : "error",
+      message: savedToBackend ? `Generated and saved: ${url}` : `Generated locally, but backend save needs attention: ${url}`,
     });
-    window.setTimeout(() => setSaved(false), 1800);
   };
 
-  const handleSave = () => {
-    saveCmsContent(content);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1800);
+  const handleSave = async () => {
+    await completeCmsSave(content, "Settings saved and refreshed.");
   };
 
   const handleEmailTest = async () => {
@@ -370,13 +385,11 @@ export default function SettingsPage({ initialTab = "identity" }) {
     setTestingEmail(false);
   };
 
-  const handleRestoreDefaults = () => {
+  const handleRestoreDefaults = async () => {
     if (!window.confirm("Restore all website settings and page content to the Ikulungwane defaults?")) return;
     const defaults = clone(cmsDefaults);
     setContent(defaults);
-    saveCmsContent(defaults);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1800);
+    await completeCmsSave(defaults, "Default settings restored and refreshed.");
   };
 
   const handleNewLegalDocument = () => {
@@ -413,20 +426,33 @@ export default function SettingsPage({ initialTab = "identity" }) {
       });
       await loadLegalDocuments();
       setLegalEditing(null);
+      notifySaved("Legal document saved and refreshed.");
+    } catch (error) {
+      notifySaveProblem(error, "Could not save the legal document.");
     } finally {
       setLegalSaving(false);
     }
   };
 
   const handleToggleLegalDocument = async (document) => {
-    await saveLegalDocument({ ...document, show_in_footer: !document.show_in_footer });
-    await loadLegalDocuments();
+    try {
+      await saveLegalDocument({ ...document, show_in_footer: !document.show_in_footer });
+      await loadLegalDocuments();
+      notifyUpdated("Footer legal link updated and refreshed.");
+    } catch (error) {
+      notifySaveProblem(error, "Could not update the footer legal link.");
+    }
   };
 
   const handleDeleteLegalDocument = async (document) => {
     if (!window.confirm(`Delete ${document.title}? This removes the footer link and legal page content.`)) return;
-    await deleteLegalDocument(document);
-    await loadLegalDocuments();
+    try {
+      await deleteLegalDocument(document);
+      await loadLegalDocuments();
+      notifyDeleted("Legal document deleted and refreshed.");
+    } catch (error) {
+      notifySaveProblem(error, "Could not delete the legal document.");
+    }
   };
 
   const socialLinks = get("global.socialLinks", []);
@@ -434,6 +460,7 @@ export default function SettingsPage({ initialTab = "identity" }) {
   const navItems = get("global.navigation.menuItems", []);
   const bookingServices = get("pages.booking.services", []);
   const bookingBudgets = get("pages.booking.budgets", []);
+  const maintenanceEnabled = Boolean(get("global.maintenance.enabled", false));
 
   return (
     <div className="admin-settings-page">
@@ -840,6 +867,60 @@ export default function SettingsPage({ initialTab = "identity" }) {
                 <Field label="Transition style" value={get("global.animations.transitionStyle")} onChange={(value) => update("global.animations.transitionStyle", value)} />
                 <Field label="Button style" value={get("global.branding.buttonStyle")} onChange={(value) => update("global.branding.buttonStyle", value)} />
               </div>
+            </SettingsSection>
+          )}
+
+          {active === "maintenance" && (
+            <SettingsSection title="Maintenance Mode" description="Temporarily take the public website offline while keeping admin access available.">
+              <div className={`admin-maintenance-card ${maintenanceEnabled ? "is-active" : ""}`}>
+                <div>
+                  <span>{maintenanceEnabled ? "Public site offline" : "Public site online"}</span>
+                  <strong>{maintenanceEnabled ? "Maintenance mode is enabled" : "Maintenance mode is disabled"}</strong>
+                  <p>
+                    {maintenanceEnabled
+                      ? "Visitors will see the maintenance page. Admin login, dashboard, setup tools, and settings remain accessible."
+                      : "Visitors can browse the public website normally."}
+                  </p>
+                </div>
+                <Power className="h-6 w-6" />
+              </div>
+
+              <div className="admin-toggle-grid">
+                <ToggleRow
+                  label="Enable maintenance mode"
+                  checked={maintenanceEnabled}
+                  onChange={(value) => update("global.maintenance.enabled", value)}
+                  help="When enabled, every public website route shows the maintenance page instead of the normal site."
+                />
+                <ToggleRow
+                  label="Show contact links"
+                  checked={Boolean(get("global.maintenance.showContactLinks", true))}
+                  onChange={(value) => update("global.maintenance.showContactLinks", value)}
+                  help="Display Email and WhatsApp buttons on the maintenance page using your contact settings."
+                />
+              </div>
+
+              <div className="admin-form-grid">
+                <Field label="Status label" value={get("global.maintenance.statusLabel")} onChange={(value) => update("global.maintenance.statusLabel", value)} />
+                <Field label="Estimated return" value={get("global.maintenance.estimatedReturn")} onChange={(value) => update("global.maintenance.estimatedReturn", value)} placeholder="Example: We will be back online shortly." />
+                <div className="md:col-span-2">
+                  <Field label="Maintenance page title" value={get("global.maintenance.title")} onChange={(value) => update("global.maintenance.title", value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Field label="Maintenance message" multiline value={get("global.maintenance.message")} onChange={(value) => update("global.maintenance.message", value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Field label="Maintenance SEO title" value={get("global.maintenance.metaTitle")} onChange={(value) => update("global.maintenance.metaTitle", value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Field label="Maintenance SEO description" multiline value={get("global.maintenance.metaDescription")} onChange={(value) => update("global.maintenance.metaDescription", value)} />
+                </div>
+              </div>
+
+              <button type="button" onClick={handleSave} className="admin-settings-tool">
+                <Save className="h-4 w-4" />
+                Save Maintenance Settings
+              </button>
             </SettingsSection>
           )}
 

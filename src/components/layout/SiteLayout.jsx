@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AshleyEffects from "./AshleyEffects";
 import ScrollPresenceEffects from "./ScrollPresenceEffects";
-import { useCms } from "@/lib/cms";
+import MaintenancePage from "@/pages/MaintenancePage";
+import { refreshCmsContent, useCms } from "@/lib/cms";
 import { applyBrandingVariables } from "@/lib/branding";
 
 const upsertMeta = (selector, attributes) => {
@@ -31,16 +32,34 @@ const upsertLink = (selector, attributes) => {
 
 export default function SiteLayout() {
   const cms = useCms();
+  const [settingsChecked, setSettingsChecked] = useState(false);
 
   useEffect(() => {
-    const { site, branding } = cms.global;
-    applyBrandingVariables(branding);
-    document.title = site.metaTitle;
+    let mounted = true;
 
-    upsertMeta('meta[name="description"]', { name: "description", content: site.metaDescription });
+    refreshCmsContent()
+      .finally(() => {
+        if (mounted) setSettingsChecked(true);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const { site, branding, maintenance } = cms.global;
+    applyBrandingVariables(branding);
+    const maintenanceEnabled = maintenance?.enabled === true;
+    const pageTitle = maintenanceEnabled ? maintenance.metaTitle || `${site.companyName} | Maintenance` : site.metaTitle;
+    const pageDescription = maintenanceEnabled ? maintenance.metaDescription || maintenance.message || site.metaDescription : site.metaDescription;
+
+    document.title = pageTitle;
+
+    upsertMeta('meta[name="description"]', { name: "description", content: pageDescription });
     upsertMeta('meta[name="keywords"]', { name: "keywords", content: site.keywords || "" });
-    upsertMeta('meta[property="og:title"]', { property: "og:title", content: site.metaTitle });
-    upsertMeta('meta[property="og:description"]', { property: "og:description", content: site.metaDescription });
+    upsertMeta('meta[property="og:title"]', { property: "og:title", content: pageTitle });
+    upsertMeta('meta[property="og:description"]', { property: "og:description", content: pageDescription });
     upsertMeta('meta[property="og:image"]', { property: "og:image", content: site.openGraphImage || "" });
     upsertMeta('meta[name="theme-color"]', { name: "theme-color", content: branding.primaryColor || branding.accentColor || "#050505" });
 
@@ -50,6 +69,24 @@ export default function SiteLayout() {
       document.querySelector('link[rel="icon"]')?.remove();
     }
   }, [cms.global]);
+
+  if (!settingsChecked) {
+    return (
+      <div className="ashley-shell min-h-screen bg-black text-white">
+        <div className="fixed inset-0 flex items-center justify-center bg-black">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (cms.global.maintenance?.enabled === true) {
+    return (
+      <div className="ashley-shell min-h-screen bg-black text-white">
+        <MaintenancePage cms={cms} />
+      </div>
+    );
+  }
 
   return (
     <div className="ashley-shell min-h-screen bg-black text-white">

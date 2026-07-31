@@ -127,6 +127,7 @@ export const refreshCmsContent = async ({ force = false } = {}) => {
 
   backendLoading = fetch(`${CONTENT_ENDPOINT}?action=getSettings`, {
     credentials: "include",
+    cache: "no-store",
   })
     .then(async (response) => {
       const text = await response.text();
@@ -150,7 +151,7 @@ export const readCmsOverride = () => deepMerge(backendOverride, readLocalCmsOver
 
 export const getCmsContent = () => deepMerge(cmsDefaults, readCmsOverride());
 
-export const saveCmsContent = (content) => {
+export const saveCmsContent = async (content) => {
   const storage = getStorage();
   if (storage) {
     try {
@@ -161,16 +162,27 @@ export const saveCmsContent = (content) => {
     }
   }
   dispatchCmsUpdate();
-  saveCmsContentToBackend(content).catch(() => {});
+
+  try {
+    await saveCmsContentToBackend(content);
+    return { savedToBackend: true };
+  } catch (error) {
+    return { savedToBackend: false, error };
+  }
 };
 
-export const resetCmsContent = () => {
+export const resetCmsContent = async () => {
   const storage = getStorage();
   storage?.removeItem(CMS_KEY);
   backendOverride = {};
   backendLoaded = false;
   dispatchCmsUpdate();
-  saveCmsContentToBackend(cmsDefaults).catch(() => {});
+  try {
+    await saveCmsContentToBackend(cmsDefaults);
+    return { savedToBackend: true };
+  } catch (error) {
+    return { savedToBackend: false, error };
+  }
 };
 
 const subscribe = (callback) => {

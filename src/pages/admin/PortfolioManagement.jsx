@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminMediaField from "@/components/admin/AdminMediaField";
+import { notifyDeleted, notifyProblem, notifySaved, notifySaveProblem, refreshAdminQueries } from "@/lib/adminFeedback";
 import { slugify } from "@/lib/adminHelpers";
 import { normalizeMediaUrl } from "@/lib/media";
 
@@ -75,11 +76,8 @@ export default function PortfolioManagement() {
     initialData: [],
   });
 
-  const invalidatePortfolio = () => {
-    queryClient.invalidateQueries({ queryKey: ["admin-portfolio"] });
-    queryClient.invalidateQueries({ queryKey: ["portfolio"] });
-    queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
-  };
+  const refreshPortfolio = () =>
+    refreshAdminQueries(queryClient, [["admin-portfolio"], ["admin-projects"], ["portfolio"], ["featured-projects"]]);
 
   const saveMutation = useMutation({
     mutationFn: (data) => {
@@ -87,17 +85,33 @@ export default function PortfolioManagement() {
       if (payload.id) return localApi.entities.PortfolioProject.update(payload.id, payload);
       return localApi.entities.PortfolioProject.create(payload);
     },
-    onSuccess: () => { invalidatePortfolio(); setDialogOpen(false); setEditing(null); },
+    onSuccess: async () => {
+      await refreshPortfolio();
+      setDialogOpen(false);
+      setEditing(null);
+      notifySaved("Portfolio category saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the portfolio category."),
   });
 
   const saveImagesMutation = useMutation({
     mutationFn: (data) => localApi.entities.PortfolioProject.update(data.id, galleryPayload(data)),
-    onSuccess: () => { invalidatePortfolio(); setImageDialogOpen(false); setImageEditing(null); },
+    onSuccess: async () => {
+      await refreshPortfolio();
+      setImageDialogOpen(false);
+      setImageEditing(null);
+      notifySaved("Gallery images saved and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not save the gallery images."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.PortfolioProject.delete(id),
-    onSuccess: invalidatePortfolio,
+    onSuccess: async () => {
+      await refreshPortfolio();
+      notifyDeleted("Portfolio category deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the portfolio category."),
   });
 
   const handleNew = () => { setEditing({ ...emptyProject }); setDialogOpen(true); };
@@ -158,7 +172,7 @@ export default function PortfolioManagement() {
         gallery_images: renumberGallery([...(current.gallery_images || []), ...uploaded]),
       }));
     } catch (error) {
-      window.alert(error.message || "Could not upload the selected images.");
+      notifyProblem("Upload failed", error, "Could not upload the selected images.");
     } finally {
       setUploadingGallery(false);
     }
@@ -167,7 +181,7 @@ export default function PortfolioManagement() {
   const handleGalleryLinkAdd = () => {
     const imageUrl = normalizeMediaUrl(galleryLink);
     if (!imageUrl) {
-      window.alert("Paste a public image URL or Google Drive share link first.");
+      notifyProblem("Image link needed", null, "Paste a public image URL or Google Drive share link first.");
       return;
     }
 

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { notifyDeleted, notifyProblem, notifySaveProblem, notifyUpdated, refreshAdminQueries } from "@/lib/adminFeedback";
 
 const STATUSES = ["new", "contacted", "qualified", "converted", "closed"];
 const statusColors = {
@@ -28,12 +29,20 @@ export default function LeadsManagement() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => localApi.entities.ContactMessage.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-leads-all"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-leads-all"], ["admin-leads"], ["contact-messages"], ["leads"]]);
+      notifyUpdated("Lead status updated and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not update the lead status."),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => localApi.entities.ContactMessage.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-leads-all"] }),
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-leads-all"], ["admin-leads"], ["contact-messages"], ["leads"]]);
+      notifyDeleted("Lead deleted and refreshed.");
+    },
+    onError: (error) => notifyProblem("Delete failed", error, "Could not delete the lead."),
   });
 
   const filtered = leads.filter((lead) => {

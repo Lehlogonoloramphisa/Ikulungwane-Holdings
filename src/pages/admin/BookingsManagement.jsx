@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { notifySaveProblem, notifyUpdated, refreshAdminQueries } from "@/lib/adminFeedback";
 import { csvEscape } from "@/lib/adminHelpers";
 
 const STATUSES = ["new", "pending_review", "quotation_sent", "confirmed", "completed", "cancelled"];
@@ -32,7 +33,11 @@ export default function BookingsManagement() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => localApi.entities.Booking.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-bookings-all"] }); },
+    onSuccess: async () => {
+      await refreshAdminQueries(queryClient, [["admin-bookings-all"], ["admin-bookings"], ["bookings"]]);
+      notifyUpdated("Booking status updated and refreshed.");
+    },
+    onError: (error) => notifySaveProblem(error, "Could not update the booking status."),
   });
 
   const filtered = bookings.filter((b) => {

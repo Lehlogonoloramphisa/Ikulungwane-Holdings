@@ -19,7 +19,8 @@ import {
   Upload,
 } from "lucide-react";
 import { cmsDefaults } from "@/data/cmsDefaults";
-import { deepMerge, getValueByPath, resetCmsContent, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
+import { deepMerge, getCmsContent, getValueByPath, refreshCmsContent, resetCmsContent, saveCmsContent, setValueByPath, useCmsOverride } from "@/lib/cms";
+import { notifySaved, notifySaveProblem } from "@/lib/adminFeedback";
 import { localApi } from "@/api/localClient";
 import { normalizeMediaUrl } from "@/lib/media";
 import { Input } from "@/components/ui/input";
@@ -878,18 +879,33 @@ export default function PageBuilder() {
     setContent((current) => updateByPath(current, path, value));
   };
 
-  const handleSave = () => {
-    saveCmsContent(content);
+  const handleSave = async () => {
+    const result = await saveCmsContent(content);
+    await refreshCmsContent({ force: true });
+    setContent(getCmsContent());
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
+
+    if (result.savedToBackend) {
+      notifySaved("Page builder changes saved and refreshed.");
+    } else {
+      notifySaveProblem(result.error, "Saved in this browser, but the backend did not confirm the change.");
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!window.confirm("Reset all CMS content to the default Ikulungwane structure?")) return;
-    resetCmsContent();
+    const result = await resetCmsContent();
+    await refreshCmsContent({ force: true });
     setContent(clone(cmsDefaults));
     setSelectedSectionId(activePage.sections[0].id);
     setActiveSlideIndex(0);
+
+    if (result.savedToBackend) {
+      notifySaved("Page builder content reset and refreshed.");
+    } else {
+      notifySaveProblem(result.error, "Reset locally, but the backend did not confirm the change.");
+    }
   };
 
   return (
